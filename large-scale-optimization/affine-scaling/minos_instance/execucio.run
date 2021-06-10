@@ -1,0 +1,8 @@
+reset;
+
+model lin_prob.mod;
+data p598.dat; # cambiar per p596 o p597 si es vol analitzar els altres problemes
+option solver minos; # cambiar per CPLEX si es vol analitzar el solver CPLEX
+solve;
+
+display x > res598.txt;

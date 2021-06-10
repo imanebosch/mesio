@@ -1,0 +1,350 @@
+---
+title: "Local Linear Regression"
+author: "Ignasi Mane, Antoni Company & Chiara Barbi"
+date: "3/8/2019"
+output: pdf_document
+mathfont: yes
+fontsize: 12pt
+subtitle: Assignment 2
+documentclass: article
+title-includes: \usepackage{titling}
+                \renewcommand\maketitlehooka{\null\mbox{}\vfill}
+                \renewcommand\maketitlehookd{\vfill\null}
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+\section{Introduction}
+
+```{r message=FALSE, warning=FALSE}
+library(glmnet)
+library(caret)
+library(sm)
+library(KernSmooth)
+library(ggplot2)
+library(gridExtra)
+set.seed(1234)
+data(aircraft)
+```
+
+We use the Aircraft dataset from the R library sm. These data record six characteristics of aircraft designs which appeared during the twentieth century. However, we will use only two variables, a response variable (Weight) and one predictor (Yr). Moreover, to normalize the response, we will apply a log transformation. $\vspace{0.2cm}$
+
+```{r message=FALSE, warning=FALSE}
+lgWeight <- log(aircraft$Weight) #log response
+Yr <- aircraft$Yr #predictor
+```
+
+\section{Descriptive Statistics}
+
+First we plot the data and fit a simple linear regression. As we can see in the chart, it seems that there is heterocedasticity because the variance increases when Yr does so. $\vspace{0.2cm}$
+
+```{r message=FALSE, warning=FALSE}
+
+plot2<-ggplot(data=aircraft)+ 
+  geom_point(aes(x=Yr, y=lgWeight), alpha=0.5, size=1, color="blue")+
+  geom_smooth(aes(x=Yr, y=lgWeight), method="lm", color="red")+ 
+  labs(title = "Linear Model")+ 
+  theme(plot.title = element_text(hjust = 0.5))
+
+plot2
+```
+
+\section{Questions}
+
+###1. Use the function loc.pol.reg that you can find in ATENEA and choose all the bandwidth values you need by leave-one-out cross-validation (you have not to program it again! Just look for the right function in the*.Rmd files you can find in ATENEA)
+
+```{r include=FALSE}
+locpolreg <- function(x,y,h=(max(x)-min(x))/5,q=1,r=0,tg=NULL,type.kernel="normal",
+                      nosubplot=FALSE,doing.plot=TRUE, ...){
+   if (is.null(tg)){tg<-x}                  
+   aux <- sort(tg,index.return=T)
+   sorted.tg <- tg[aux$ix]
+   sorted.tg.ix <- aux$ix
+
+   n <- length(x);
+   m <- length(tg);
+   mtgr <- numeric(m);
+   S <- matrix(0,nrow=m,ncol=n)
+
+   for (i in seq(1,m)){
+      aux <- kernel((x-tg[i])/h,type=type.kernel);
+      Ih <- (aux>0);
+      ni <- sum(Ih);     
+      xh <- x[Ih]-tg[i];
+      Dq <- matrix(1,nrow=ni,ncol=q+1);
+      if (q>0){for (j in 1:q) Dq[,j+1] <- xh^j}
+      Wx <- kernel(xh/h,type=type.kernel)/h;
+      Wm <- Wx%*%ones(1,q+1);
+      Dqq <- Wm*Dq;
+      Si <- solve(t(Dq)%*%Dqq)%*%t(Dqq);
+      beta <- Si%*%y[Ih];
+      mtgr[i] <- factorial(r)*beta[r+1];
+      S[i,Ih] <- Si[r+1,]
+   }
+  
+   if (doing.plot){
+      if (r==0){
+        if (nosubplot) 
+        par(mfrow=c(1,1), mgp=c(1.5,0.5,0))
+        plot(x,y,col="grey",...)
+        lines(sorted.tg,mtgr[sorted.tg.ix],col=1,lwd=2)
+      } 
+      else{
+         par(mfrow=c(2,1), mgp=c(1.5,0.5,0))
+         aux <- locpolreg(x,y,h,q,0,tg,nosubplot=F,type.kernel,...)
+         plot(sorted.tg,mtgr[sorted.tg.ix],type="n", 
+              xlab="x",ylab="Estimated derivative")
+         abline(h=0,col=4)
+         lines(sorted.tg,mtgr[sorted.tg.ix],col=1,lwd=2)
+      }
+   }
+return(list(mtgr=mtgr,S=S))
+}
+
+epan <- function(x){pmax(.75*(x+1)*(1-x))}
+
+kernel <- function(x,type=c("normal","epan","rs.epan","unif")){
+   switch(type[1],
+          epan = pmax(.75*(x+1)*(1-x),0),
+          rs.epan = pmax(.75*(x/sqrt(5)+1)*(1-x/sqrt(5))/sqrt(5),0),
+          unif = as.numeric( (abs(x)<=1) )/2,
+          dnorm(x))
+}
+
+ones <- function(n,m){matrix(1,nrow=n,ncol=m)}
+
+k.fold.cv <- function(x,y,k=10,h=range(x)/10,p=1,type.kernel="normal"){
+  n <- length(x)
+  Ik <- floor((0:(n-1))/(n/k))+1
+  ssr <- 0
+  for (i in (1:k)){
+    y.i <- y[Ik==i]
+    aux <- locpolreg(x[Ik!=i],y[Ik!=i],h=h,p=p,tg=x[Ik==i],
+                     type.kernel=type.kernel, doing.plot=FALSE)
+    ssr <- ssr + sum((y.i-aux$mtgr)^2)
+  }
+  k.cv <- ssr/n
+  return(k.cv)
+}
+```
+
+With the aim to fit the optimum local lineal regression we must determine the optimal bandwidth. To find it, we apply leave-one-out cross-validation using the normal distribution as the Kernel function. $\vspace{0.2cm}$
+
+```{r}
+n <- length(Yr)
+h.v <-  exp(seq(from=log(1), to = log(max(Yr)), length=30))
+results <- data.frame(h=as.numeric(),mssr=as.numeric())
+
+for (i in 1:length(h.v)) {
+  #loocv is k-fold cv when k=n
+  mssr <- k.fold.cv(x=Yr,y=lgWeight,h=h.v[i],k = n)
+  results[i,] <- c(h.v[i],mssr)
+
+}
+
+h.opt <- results[results$mssr==min(results$mssr),][,1]
+
+par(mgp=c(1.5,0.5,0))
+plot(x=results$h,y=results$mssr,
+     cex.axis=0.8, cex=0.6, cex.main=0.9,
+     xlab = "bandwidth", ylab = "mean ssr",
+     main = "Expected mean ssr estimated by loo-cv")
+abline(v=h.opt,col=2,lty=2)
+```
+
+The the optimal value for the bandwidth is: $\vspace{0.2cm}$
+
+```{r}
+h.opt
+```
+
+Once the optimal bandwidth is found, we use the function locpolreg() to fit a local linear regression to express lgWeight as a function of Yr. $\vspace{0.2cm}$
+
+```{r}
+f.model <- locpolreg(x=Yr,y=lgWeight,h=h.opt,q=1,r=0,tg=NULL,
+                     type.kernel="normal", nosubplot=TRUE, doing.plot=TRUE, 
+                     cex.main=0.9, cex.axis=0.8, cex=0.7,
+                     xlab = "Year first Manufacture", 
+                     ylab = "log Weight",main= "Local Linear Regression")
+
+y.hat <- f.model$mtgr
+```
+
+In the previous steps we have estimated the optimal Local Linear Regression for the data analysed (lgWeight as function of Yr), obtaining an estimated response for each obserbation ($\hat{m}(Yr)$).
+
+Now, in the following steps we will estimate the conditional variance ($\hat{\sigma}^2$) of lgWeigth given Yr to see the effect of the variance on the previous estimated Local linear regression model at each local point of the regression.
+
+In order to estimate the conditional variance, we calculate the estimated residuals form the previous regression, where:
+
+$$\hat{\epsilon} = lgWeight - \hat{Y}$$
+```{r}
+res <- lgWeight-y.hat
+```
+
+And then, we have to transform them:
+
+$$Z = log (\hat{\epsilon}^2)$$
+
+```{r}
+Z <- log(res^2)
+```
+
+Once we have the data transformed we will fit a nonparametric regression of $Z$ as a function of $Yr$. The estimated regression obtained will be $\hat{q}(Yr)$. Where $\hat{q}(Yr)$ is an estimation of $log(\sigma^2(Yr))$, therefore, the estimated conditional variance of the model will be:
+
+$$\hat{\sigma}^2 = e^{\hat{q}(Yr)}$$
+
+To proceed with the estimated regression of $\hat{q}(Yr)$ we have previously obtained $Z$ from the estimated residuals of the previous model.
+
+Once the data is prepared, apply again leave-one-out cross-validation using as the Kernel function the normal distribution. $\vspace{0.2cm}$
+
+```{r}
+n <- length(Yr) #loocv is k-fold cv when k=n
+h.v <-  exp(seq(from=log(1), to = log(max(Yr)), length=30))
+results <- data.frame(h=as.numeric(),mssr=as.numeric())
+
+for (i in 1:length(h.v)) {
+
+  mssr <- k.fold.cv(x=Yr,y=Z,h=h.v[i],k=n)
+  results[i,] <- c(h.v[i],mssr)
+
+}
+
+h.opt <- results[results$mssr==min(results$mssr),][,1]
+
+par(mgp=c(1.5,0.5,0))
+plot(x=results$h,y=results$mssr,
+     cex.axis=0.8, cex=0.6, cex.main=0.9,
+     xlab = "bandwidth", ylab = "mean ssr",
+     main = "Expected mean ssr estimated by loo-cv")
+abline(v=h.opt,col=2,lty=2)
+```
+
+The optimal bandwidth for $\hat{q}(Yr)$ is
+
+```{r}
+h.opt
+```
+
+When the optimal bandwidth is established, we can proceed with the local linear regression of $\hat{q}(Yr)$.
+
+```{r}
+z.model <- locpolreg(x=Yr,y=Z,h=h.opt,q=1,r=0,tg=NULL,type.kernel="normal",
+                      nosubplot=TRUE,doing.plot=TRUE, cex.main=0.9, cex.axis=0.8,
+                      cex=0.7,xlab = "Year first Manufacture", ylab = "sigma")
+
+```
+
+Once the regression for the $\hat{q}(Yr)$ is completed, we proceed applying $\hat{\sigma}^2=e^{\hat{q}(Yr)}$ to obtain the conditional variance of the model ($\hat{\sigma}^2$).
+
+The code implemented to obtain this transformation is the following: $\vspace{0.2cm}$
+
+```{r}
+e.val <- z.model$mtgr
+es.val <- z.model$S%*%lgWeight
+sigma2<-exp(e.val)
+sigma <- sqrt(sigma2)
+```
+
+Once the transformation is done, we proceed with the graphic of $\hat{\epsilon}^2$ against $Yr$ superimposing the estimated conditional variance of the model ($\hat{\sigma}^2$) and the estimated conditional standard deviation ($\hat{\sigma} = \sqrt{\hat{\sigma}^2}$). $\vspace{0.2cm}$
+
+```{r warning=FALSE}
+ggplot(as.data.frame(cbind(Yr,res^2)),aes(Yr,res^2))+
+  geom_point(col="black",alpha=0.5, size=1)+
+  geom_line(aes(y=sigma2,x=Yr,colour="red"),size=1.2)+
+  ggtitle("Squared Residual as function of the Year of first manufacture")+
+  xlab("Year first Manufacture")+ylab("Squared residuals")+ 
+  theme(plot.title = element_text(hjust = 0.5))+
+  scale_color_discrete(name = "Estimated \n conditional \n variance", 
+                       labels =paste("sigma^2"))
+```
+
+Now, we can finally plot $\hat{m}(Yr)$ and superimposing the bands of $\hat{m}(Yr)\pm 1.96\hat{\sigma}(Yr)$ using the estimated conditional standard deviation obtained. $\vspace{0.2cm}$ 
+
+```{r}
+regression.customm.function <- ggplot(aircraft, aes(Yr,lgWeight))+
+  ggtitle("Local Linear Regression using a custom function")+
+  xlab("Year first Manufacture")+ylab("Weight Logarithm")+ 
+  theme(plot.title = element_text(hjust = 0.5))+
+  geom_point(col="black", alpha=0.5, size=1)+
+  geom_line(aes(y=f.model$mtgr, x=Yr), col="red",size=1.25)+
+  geom_ribbon(aes(ymin=f.model$mtgr-1.96*sigma, 
+                  ymax=f.model$mtgr+1.96*sigma), alpha=0.3)
+
+regression.customm.function
+```
+
+
+###2. Use the function sm.regression from library sm and choose all the bandwidth values you need by direct plug-in (use the function dpill from the same library KernSmooth).
+
+The objective of this exercise is to replicate the results obtained in the previous point by using the functions available in the library sm of R.
+
+As before, we will start finding the optimal bandwidth. We will use the function dpill() available in the library sm. $\vspace{0.2cm}$
+
+```{r}
+h.dp <- dpill(x=Yr,y=lgWeight)
+h.dp
+```
+
+Using the optimal bandwidth, we will fit the optimal local linear regression ($\hat{m}(Yr)$) represented in the following plot. $\vspace{0.2cm}$
+
+```{r}
+s.model <- sm.regression(x=Yr, y=lgWeight, h=h.dp, eval.points=Yr) 
+```
+
+Once $\hat{m}(Yr)$ is found, we need to compute $Z$ where, just as a reminder, $Z = log((lgWeight-\hat{y})^2)$. $\vspace{0.2cm}$
+
+```{r}
+y.hat <- s.model$estimate
+eval.points <- s.model$eval.points
+
+res <- lgWeight-y.hat
+Z <- log(res^2)
+```
+
+When $Z$ is computed, we will proceed with the regression of $Z$ as a function of $Yr$ to finally obtain $\hat{q}(Yr)$. Where $\hat{\sigma}^2 = e^{\hat{q}(Yr)}$ corresponds to the estimated conditional variance of the model.
+
+First, we need to obtain the optimal bandwidth, which will be: $\vspace{0.2cm}$
+
+```{r}
+h.dp <- dpill(x=Yr,y=Z)
+h.dp
+```
+
+Finally, we will do the local linear regression to obtain $\hat{q}(Yr)$ displayed in the following plot. $\vspace{0.2cm}$
+
+```{r}
+z.model <- sm.regression(x=Yr, y=Z, h=h.dp, eval.points=Yr) 
+```
+
+Finally, we apply the transformation $\hat{\sigma}^2 = e^{\hat{q}(Yr)}$ to obtain the estimated conditional variance and standard deviation. $\vspace{0.2cm}$
+
+```{r}
+y.hat <- z.model$estimate
+sigma2<-exp(y.hat)
+sigma <- sqrt(sigma2)
+```
+
+Now, we can finally plot $\hat{m}(Yr)$ and superimposing the bands of $\hat{m}(Yr)\pm 1.96\hat{\sigma}(Yr)$ using the estimated conditional standard deviation obtained with the library sm. $\vspace{0.2cm}$
+
+```{r}
+regression.r.function <-ggplot(aircraft, aes(Yr,lgWeight))+
+  ggtitle("Local Linear Regression using library sm")+
+  xlab("Year first Manufacture")+ylab("Weight Logarithm")+ 
+  theme(plot.title = element_text(hjust=0.5))+
+  geom_point(col="black",alpha=0.5, size=1)+
+  geom_line(aes(y=s.model$estimate, x=Yr),col="red",size=1.25)+
+  geom_ribbon(aes(ymin=s.model$estimate-1.96*sigma, 
+                  ymax=s.model$estimate+1.96*sigma),alpha=0.3) 
+
+regression.r.function
+```
+
+###3. Results comparision.
+
+```{r}
+grid.arrange(regression.customm.function, regression.r.function, ncol=2)
+```
+
+As we can see, both models are quite similar. The difference is due to the method used to chose the bandwidth parameter.

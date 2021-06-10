@@ -1,0 +1,73 @@
+reset;
+
+model SVM.mod;
+data data_N50.dat;
+option solver cplex;
+
+param epsi := 1e-5; #numeric 0
+param dw {N};
+param sva;
+param yd;
+
+problem Primal: w, s, y, P, res_1;
+problem Dual: lambda, D, res_2, res_3;
+
+for {h in {1..20 by 1}} {
+
+let v := h;
+let n := 4;
+let m := 50; 
+
+printf "\nSVM PRIMAL PROBLEM v=%2i\n" , h;
+printf "-----------------------------------------------------------------------|\n\n";
+
+		solve Primal;
+		
+		printf "\nWEIGHTS:\n\n";
+		display w; #weights
+		
+		printf "\nINDEPENDENT TERMS:\n\n";
+		display y , y+1, y-1; #distances
+
+
+		#Print results of iteration v=l
+		printf "%3i %12.2f",
+				h,
+				y > Primal_res.txt; 				
+		
+		printf {p in N}: "%12.2f", w[p] > Primal_res.txt;
+		printf "\n" > Primal_res.txt;
+		###################################
+
+printf "\nSVM DUAL PROBLEM v=%2i\n" , h;
+printf "-----------------------------------------------------------------------|\n\n";
+
+		#kernel identity
+		let {i in M, j in M} K[i,j] := sum {l in N} x[i,l]*x[j,l]; 		
+		solve Dual;
+		
+		printf "\nWEIGHTS:\n\n";	
+		let {j in N} dw[j] := sum {i in M} lambda[i]*x[i,k]*x[i,j];
+		display dw;
+		
+		printf "\nINDEPENDENT TERMS CALCULATION v=%2i\n" , h;
+		printf "--------------------------------------------------|\n\n";
+		#Retriving intercept
+		printf "\nSUPORT VECTORS:\n\n";
+		display {i in M: s[i]<=epsi and lambda[i]>epsi} i;
+		let sva := min {i in M: s[i]<=epsi and lambda[i]>epsi} i;
+		
+		printf "\nINDEPENDENT TERM WITH OBS X=%2i:\n\n",sva;	
+		let yd:= (sum {j in N} dw[j]*x[sva,j]) - (1/x[sva,k]);
+		display yd, yd+1, yd-1;
+		
+		#Print results of iteration v=l
+		printf "%3i %12.2f",
+				h,
+				yd > Dual_res.txt; 				
+		
+		printf {p in N}: "%12.2f", dw[p] > Dual_res.txt;
+		printf "\n" > Dual_res.txt;
+		###################################
+
+}

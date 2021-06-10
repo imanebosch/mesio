@@ -1,0 +1,6 @@
+reset;
+model NN.mod;
+data traindata.dat;
+option solver MINOS;
+solve;
+display weight;

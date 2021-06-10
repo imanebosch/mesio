@@ -1,0 +1,136 @@
+######################################
+### BENDERS DECOMPOSITION RUN FILE ###
+######################################
+reset;
+
+model bendersOGE.mod;
+data xarxa05.dat;
+option solver cplex;
+
+
+#PROBLEM DEFINITIONS
+problem LP: y,xl,I,capsl,z;
+problem SubProblem: xl,I,caps,zd;
+problem MasterP: zmp,y,Bcut,ZMP;
+
+##SOLUTION OF THE LMIP WITH CPLEX
+printf "\nSOLVING THE OPTIMIZATION PROBLEM\n";
+printf "-----------------------------------------------------------------------|\n\n";
+solve LP;
+printf "\n";
+
+printf "Invenstment Costs = %i\n", sum {(i,j) in Ahat} f[i,j]*y[i,j];
+printf "Explotation Costs = %i\n", sum {l in O} sum{(i,j) in AA} c[i,j,l]*xl[i,j,l];
+printf "List of added Arcs to the network: \n";
+display {(i,j) in Ahat: y[i,j]=1} y[i,j];
+
+##SOLUTION BY BENDERS DECOMPOSITION
+printf "\nSOLVING BY BENDERS ALGORITHM\n";
+printf "-----------------------------------------------------------------------|\n";
+
+param eps := 1.0e-6;
+param lowb default -10000000;
+param upperb;
+param relgap default Infinity;		
+
+for {k in {0..1}} { #initial yb values 0 and 1
+
+	printf "\nSTART POINT y = %d\n", k;
+	printf "-----------------------------------------------------------------------|\n";
+	
+	let {(i,j) in Ahat} yb[i,j]:=k; #set initial value
+	let nCUT := 0;  #count number of cuts
+	let zmp := -10000000; #mp* to a low enough value
+	reset data restric, u, ybk, lowb, relgap;
+
+	repeat { 
+	
+		printf "\nITERATION %d\n", nCUT+1;
+		printf "------------------------------------------------------------|\n";
+		
+		printf "\nSOLVING THE SUBPROBLEM\n\n";
+		
+			solve SubProblem;
+			printf "\n";
+					
+			printf "Invenstment Costs = %i\n", sum {(i,j) in Ahat} f[i,j]*yb[i,j];
+			printf "Explotation Costs = %i\n", sum {l in O} sum{(i,j) in AA} c[i,j,l]*xl[i,j,l];
+			printf "List of decision variables: \n";
+			display yb;
+			
+			#Results of y investments for each iteration and starting point yb=k
+			printf "%12.2f %12.2f", k, nCUT+1 >> BD_Inv_Arc.txt; 
+			printf {(i,j) in Ahat}: "%3i", yb[i,j] >> BD_Inv_Arc.txt;
+			printf "\n" >> BD_Inv_Arc.txt;
+			###################################################
+			
+			let upperb:= zd + sum {(i,j) in Ahat} f[i,j]*yb[i,j];
+			let relgap := (upperb - lowb) / ( abs(lowb) + eps );			
+			
+			printf "Upper bound: %i\n",upperb;
+			printf "Lower bound: %i\n",lowb;
+			
+			#Results for each iteration and starting point yb=k		    
+		    printf "%3i %3i %12.2f %12.2f %12.2f %12.2f\n", 
+		    	k,
+		    	nCUT+1,
+		    	lowb, 
+		    	upperb, 
+		    	sum {(i,j) in Ahat} f[i,j]*yb[i,j], 
+		    	sum {l in O} sum{(i,j) in AA} c[i,j,l]*xl[i,j,l] >> BD_Alg_Res.txt;
+		    ####################################################
+		    	
+		    if relgap <= eps then break; #relative gap
+							    
+			let nCUT := nCUT +1;
+		    let {(i,j) in Ahat, l in O} restric[i,j,l,nCUT]:=caps[i,j,l];
+		    let {i in N, l in O} u[i,l,nCUT]:=-I[i,l]+I[l,l];
+		    let {(i,j) in Ahat} ybk[i,j,nCUT]:=yb[i,j];
+	    
+	    printf "\nSOLVING THE MASTER PROBLEM\n\n";
+	     
+		    solve MasterP;
+			
+			let lowb := ZMP;
+		    let {(i,j) in Ahat} yb[i,j]:= y[i,j];
+		                	  
+	} until nCUT = Niter;
+	
+	printf "\nBENDERS RESULTS\n";
+	printf "-----------------------------------------------------------------------|\n\n";
+	
+		if nCUT=100 
+			then printf "\The algorithm receached the maximum number of iterations\n";
+		else 
+			printf "\The relative gap has reached an amount less or equal than epsilon\n";
+			
+		printf "\nOPTIMAL SOLUTION\n";
+		
+			display zmp;
+			
+		printf "\INCLUDED AND EXCLUDED ARCS\n";
+		
+			display y;
+		
+		printf "\FINAL NETWORK FLOWS\n\n";
+			
+			printf "\nOrigin N3:\n\n";
+			display {(i,j) in AA} xl[i,j,3];
+			display {(i,j) in AA} xl[i,j,3].rc;
+			display {(i,j) in AA} xl[i,j,3].status;
+			
+			#Optimal flow per arc and O3 per every starting point yb=k
+			printf {(i,j) in AA}: "%3i %3i %3i %4i\n",k , i, j, xl[i,j,3] >> flows3.txt;
+			####################################################
+			
+			printf "\nOrigin N11:\n\n";
+			display {(i,j) in AA} xl[i,j,11];
+			display {(i,j) in AA} xl[i,j,11].rc;
+			display {(i,j) in AA} xl[i,j,11].status;
+			
+			#optimal flow per arc and O11 per every starting point yb=k
+			printf {(i,j) in AA}: "%3i %3i %3i %4i\n",k , i, j, xl[i,j,11] >> flows11.txt;
+			####################################################
+	
+}
+

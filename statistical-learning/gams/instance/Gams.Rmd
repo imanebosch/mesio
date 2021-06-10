@@ -1,0 +1,251 @@
+---
+title: "Gams"
+author: "Ignasi Mane, Antoni Company & Chiara Barbi"
+date: "24/3/2019"
+output: pdf_document
+mathfont: yes
+fontsize: 12pt
+subtitle: Assignment 2
+documentclass: article
+title-includes: \usepackage{titling}
+                \renewcommand\maketitlehooka{\null\mbox{}\vfill}
+                \renewcommand\maketitlehookd{\vfill\null}
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+\section{Introduction}
+
+Hirsutism is the excessive hairiness on women in those parts of the body where terminal hair does not normally occur or is minimal -for example, a beard or chest hair. It refers to a male pattern of body hair (androgenic hair) and it is therefore primarily of cosmetic and psychological concern. Hirsutism is a symptom rather than a disease and may be a sign of a more serious medical condition, especially if it develops well after puberty.
+
+The amount and location of the hair is measured by a Ferriman-Gallwey score. The original method used 11 body areas to assess hair growth, but was decreased to 9 body areas in the modified method: Upper lip, Chin, Chest, Upper back, Lower back, Upper abdomen, Lower abdomen, Upper arms, Thighs, Forearms (deleted in the modified method) and Legs (deleted in the modified method). In the modified method, hair growth is rated from 0 (no growth of terminal hair) to 4 (extensive hair growth) in each of the nine locations. A patient's score may therefore range from a minimum score of 0 to a maximum score of 36.
+
+A clinical trial was conducted to evaluate the effectiveness of an antiandrogen combined with an oral contraceptive in reducing hirsutism for 12 consecutive months. It is known that contraceptives have positive effects on reduction of hirsutism. The degree of hirsutism is measured by the modified Ferriman-Gallwey scale. Patients were randomized into 4 treatment levels: levels 0 (only contraceptive), 1, 2, and 3 of the antiandrogen in the study (always in combination with the contraceptive). The clinical trial was double-blind.
+
+The data set hirsutism.dat contains artifucial values of measures corresponding to some patients in this study. The variables are the following:
+
+>**Treatment:** with values 0, 1, 2 or 3.
+
+>**FGm0:** it indicates the baseline hirsutism level at the randomization moment (the beginning of the clinical trial). Only women with baseline FG values grater than 15 where recruited.
+
+>**FGm3:** FG value at 3 months.
+
+>**FGm6:** FG value at 6 months.
+
+>**FGm12:** FG value at 12 months, the end of the trial.
+
+>**SysPres:** baseline systolic blood pressure.
+
+>**DiaPres:** baseline diastolic blood pressure.
+
+>**weight:** baseline weight.
+
+>**height:** baseline height.
+
+\section{Questions}
+
+###1). Fit several GAM models (including semiparametric models) explaining FGm12 as a function of the variables that were measured at the beginning of the clinical trial (including FGm0) and Treatment (treated as factor). Use functions summary, plot and vis.gam to get an insight into the fitted models. Then use function anova to select among them the model (or models) that you think is (are) the most appropriate.
+
+We load the required libraries
+
+```{r message=FALSE, warning=FALSE}
+library(mgcv)
+library(ggplot2)
+library(emmeans)
+```
+
+We load the data stored in the file hirsutism.dat and use the function str to check the type of variables. We also erase those variables not needed for the assignment, that is, the variables that were not taken at the beginning of the experiment. To make things simpler, we will use the default tuning parameters that the function gam provides to us in the entire document $\vspace{0.2cm}$
+
+```{r}
+hirs <- read.table("hirsutism.dat",header=T, sep="\t",fill=TRUE)
+hirs <- na.omit(hirs[,-c(3:4)])
+str(hirs)
+```
+
+As required, we define the variable Treatment as a factor with levels 0, 1, 2, and 3. Each level represents a type of treatment used to treat the disease. $\vspace{0.2cm}$
+
+```{r}
+hirs$Treatment <- factor(hirs$Treatment)
+```
+
+We take a look to the data using the function summary
+
+```{r}
+summary(hirs)
+```
+
+We compute the correlation matrix to see which covariates are linearly correlated.
+
+```{r}
+cor <- round(cor(hirs[,2:7], use = "complete.obs"),2)
+print(cor)
+```
+
+We look for variables with possible prediction power. As we see in the previous correlation table, it seems that FGm12 is poorly linearly correlated with its potential covariates. FGm0 might have something to say but in general no linear relation seems to exist between the response variable and the covariates. $\vspace{0.2cm}$
+
+##Fitting a linear model
+
+We will try to fit a linear model with two covariates: the factor treatment and the continuous variable FGm0. First we plot the data to detect any possible pastern in the data. $\vspace{0.2cm}$
+
+```{r}
+ggplot(hirs,aes(x=FGm0,y=FGm12))+
+  geom_point(aes(FGm0,FGm12), col=as.numeric(hirs$Treatment)+1)+
+  ggtitle(label="FGm12 vs FGm0 and Treatment")+
+  theme(plot.title = element_text(hjust = 0.5))+
+  geom_smooth(method = "lm")
+```
+
+We want to check whether there are differences between the four types of treatments. To do so we will fit a linear model. First doing only an ANOVA with one factor (Treatment) and then trying to add the covariate FGm0 to see whether it is significant. $\vspace{0.2cm}$
+
+```{r}
+mod.glm0 <- lm(FGm12~Treatment, data = hirs)
+summary(mod.glm0)
+
+mod.glm1 <- lm(FGm12~Treatment+FGm0, data = hirs)
+summary(mod.glm1)
+
+anova(mod.glm0,mod.glm1, test = "F")
+```
+
+If we compare both models using the function anova, we can say that we do have statistical evidence to conclude that the covariate FGm0 is relevant to explain the data. Therefore, we chose the former model. To check whether there are differences between treatments we apply the tukey test using the package emmeans. $\vspace{0.2cm}$
+
+```{r}
+emm<-emmeans(mod.glm1,~Treatment)
+cld(emm)
+```
+
+Applying this method we can conclude that treatment 0 is less effective than 1 and 2 but we do not have statistical evidence to say that treatment 3 and 0 have different effectiveness. We check the hypothesis of the model with classical diagnostics plots. $\vspace{0.2cm}$
+
+```{r}
+par(mfrow=c(2,2), mgp=c(1.5,0.5,0),oma=c(0,0,0,0),mar=c(4,3,2,2))
+
+plot(x=mod.glm1$fitted.values,y=hirs$FGm12, pch=18, cex=0.5,
+     cex.lab=0.9,cex.axis=0.8,cex.main=0.9,
+     xlab = "Predicted FGm12",
+     ylab = "Orignal FGm12",
+     main = "Predicted vs. Original Values")
+abline(a=0,b=1, col=2, lty=3)
+
+hist(x = mod.glm1$residuals, freq = FALSE,
+     main = "Residuals histogram",
+     xlab = "Residuals",breaks = 15,
+     cex.lab=0.9,cex.axis=0.8,cex.main=0.9)
+
+plot(mod.glm1, which=c(1:2), 
+     cex=0.5, cex.main=0.9,cex.lab=0.9,cex.axis=0.8,
+     sub.caption = "")
+```
+
+The residuals diagnostics seems to confirm the hypothesis of the linear model. Finally, we will use the function gam to create a gam object that will allow to compare this model to the ones that we will try later on this document. Notice that the model obtained is equivalent. $\vspace{0.2cm}$
+
+```{r}
+mod.glm1 <- gam(FGm12~Treatment+FGm0, data = hirs)
+```
+
+##Fitting a semiparametric model 1
+
+We fit the following semi parametric model: $\vspace{0.2cm}$
+
+```{r}
+mod.glm2 <- gam(FGm12~Treatment+s(FGm0), data = hirs)
+summary(mod.glm2)
+```
+
+```{r warning=FALSE}
+vis.gam(mod.glm2,se=0,theta =40, phi = 10, d=4,nticks=3)
+text(-.61,-.1,'RM',srt=90)
+```
+
+Once we have summarized the model, we can see that all the parametric coefficients analyzed are significant with a p-value smaller than 0.05 and, for the non-parametric, FGm0 is significant with a p-value lower than 0.05.
+
+We can also see that the adjustment of the model is really low with a value of $R^2=0.259$ and with a deviance explained of only the 33.1%.
+
+If we analyse the residuals of the model $\vspace{0.2cm}$
+
+```{r}
+par(mfrow=c(2,2), mgp=c(1.5,0.5,0),oma=c(1,0,1,0),mar=c(4,3,2,2))
+
+plot(x=mod.glm2$fitted.values,y=hirs$FGm12, pch=18, cex=0.5,
+     cex.lab=0.9,cex.axis=0.8,cex.main=0.9,
+     xlab = "Predicted FGm12",
+     ylab = "Orignal FGm12",
+     main = "Predicted vs. Original Values")
+abline(a=0,b=1, col=2, lty=3)
+
+hist(x = residuals(mod.glm2), freq = FALSE,
+     main = "Residuals histogram",
+     xlab = "Residuals",breaks = 15,
+     cex.lab=0.9,cex.axis=0.8,cex.main=0.9)
+
+qq.gam(mod.glm2, rep = 0, level = 0.9, rl.col = 2, 
+       rep.col = "gray80",main="Q-Q plot",cex.main=0.9)
+
+plot(napredict(mod.glm2$na.action, mod.glm2$linear.predictors), 
+     residuals(mod.glm2), main = "Resids vs. linear pred.", 
+     xlab = "linear predictor", ylab = "residuals",cex.main=0.9)
+abline(h=0, lty=2, col="red")
+```
+
+##Fitting a semiparametric model 2
+
+We fit the following semi parametric model: $\vspace{0.2cm}$
+
+```{r}
+mod.glm4 <- gam(FGm12~Treatment+s(FGm0, SysPres), data = hirs, na.action = na.omit)
+summary(mod.glm4)
+```
+
+```{r warning=FALSE}
+vis.gam(mod.glm4,se=0,theta =40, phi = 10, d=4,nticks=3)
+text(-.61,-.1,'RM',srt=90)
+```
+
+If we analyse the results of the model, we can see that all the parametric coefficients analyzed are significant with a p-value smaller than 0.05 and also for the non-parametric ones.
+
+We can also see that the adjustment of the model is extremely low with a value of $R^2=0.186$ and with a deviance explained of only the 23.2%.
+
+If we proceed to analyse the residuals of the model $\vspace{0.2cm}$
+
+```{r}
+par(mfrow=c(2,2), mgp=c(1.5,0.5,0),oma=c(1,0,1,0),mar=c(4,3,2,2))
+
+plot(x=mod.glm4$fitted.values,y=hirs$FGm12, pch=18, cex=0.5,
+     cex.lab=0.9,cex.axis=0.8,cex.main=0.9,
+     xlab = "Predicted FGm12",
+     ylab = "Orignal FGm12",
+     main = "Predicted vs. Original Values")
+abline(a=0,b=1, col=2, lty=3)
+
+hist(x = residuals(mod.glm4), freq = FALSE,
+     main = "Residuals histogram",
+     xlab = "Residuals",breaks = 15,
+     cex.lab=0.9,cex.axis=0.8,cex.main=0.9)
+
+qq.gam(mod.glm4, rep = 0, level = 0.9, rl.col = 2, 
+       rep.col = "gray80", main="Q-Q plot",cex.main=0.9)
+
+plot(napredict(mod.glm4$na.action, mod.glm4$linear.predictors), 
+     residuals(mod.glm4), main = "Resids vs. linear pred.", 
+     xlab = "linear predictor", ylab = "residuals",
+     cex.lab=0.9,cex.axis=0.8,cex.main=0.9)
+abline(h=0, lty=2, col="red")
+```
+
+##Model Comparaison
+
+Finally we will use to criteria to compare the three models that we defined. First we will use the function anova to compare the models pairwise using the Chi square test and then we will apply the Akaike Information Criteria. $\vspace{0.2cm}$
+
+```{r}
+anova(mod.glm1,mod.glm2, test = "Chisq")
+anova(mod.glm4,mod.glm2, test = "Chisq")
+```
+
+According to this criteria, which does not penalize the complexity of the model, the best model is "mod.glm2" $\vspace{0.2cm}$
+
+```{r}
+AIC(mod.glm1,mod.glm2,mod.glm4)
+```
+
+According to this criteria, which does penalize the complexity of the model, the best model is also "mod.glm2"

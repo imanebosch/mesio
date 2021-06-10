@@ -1,0 +1,74 @@
+reset;
+model SCP.mod;
+data SCP.dat;
+option solver MINOS;
+solve;
+
+#########
+#TABLE 1#
+#########
+
+#AUXILIAR VARIABLES (prefix O -output-) 
+var O_revenue {t in TIME} = sum {p in PROD,i in FACT,j in MARK} 
+   	pricet[j,p] * sellt[i,j,p,t];
+var O_prod_cost {t in TIME} = sum {p in PROD,i in FACT}
+   	make_cost[i,p,t]*prodt [i,p,t];
+var O_inv_cost {t in TIME} = sum {p in PROD,i in FACT}
+    inv_cost[i,p]*invent[i,p,t]; 
+var O_trans_cost {t in TIME} = sum {p in PROD,i in FACT,j in MARK} 
+	trans_cost[i,j,p]*sellt[i,j,p,t];
+var O_profit {t in TIME} = O_revenue[t]-O_prod_cost[t]-O_inv_cost[t]-O_trans_cost[t];	
+   
+display O_revenue,O_prod_cost,O_inv_cost,O_trans_cost,O_profit;
+
+#########
+#TABLE 2#
+#########
+
+#AUXILIAR VARIABLES (prefix O -output-) 
+var O_difprice {p in PROD, j in MARK} = pricet[j,p]-price_current[p];
+param O_demand_curr {p in PROD, j in MARK} = sum{t in TIME} demand_current[j,p,t];
+var O_demand {p in PROD, j in MARK} = sum{t in TIME} demant[j,p,t];
+var O_difdemand {p in PROD, j in MARK} = (sum{t in TIME} demant[j,p,t])-(sum{t in TIME} demand_current[j,p,t]);
+
+display {p in PROD}: {j in MARK} (
+	price_current[p], 
+	pricet[j,p],
+	O_difprice[p,j],
+	O_demand_curr[p,j],
+	O_demand[p,j],
+	O_difdemand[p,j]
+	);
+
+#########
+#TABLE 3#
+#########
+
+#AUXILIAR VARIABLES (prefix O -output-) 
+var O_pricevar {p in PROD} = (sum {j in MARK} ((pricet[j,p]-price_current[p])/price_current[p]))*100/card(MARK);
+var O_demandvar {p in PROD} = (sum {j in MARK} (sum{t in TIME} (demant[j,p,t])-sum{t in TIME} (demand_current[j,p,t]))/sum{t in TIME} (demand_current[j,p,t]))*100/card(MARK);
+
+display {p in PROD} (
+	O_pricevar[p],
+    O_demandvar[p]
+	);
+
+#########
+#TABLE 4#
+#########
+
+#AUXILIAR VARIABLES (prefix O -output-) 
+
+display {p in PROD, i in FACT}: {t in TIME} (
+	p,
+	i,
+	invent[i,p,t-1],
+	prodt[i,p,t],
+	sum{j in MARK} sellt[i,j,p,t],
+	invent[i,p,t]
+	);
+
+#########
+#TABLE 5#
+#########
+display sellt;

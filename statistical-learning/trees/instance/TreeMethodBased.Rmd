@@ -1,0 +1,316 @@
+---
+title: "Tree Methods"
+author: "Ignasi Mañé, Antoni Company & Chiara Barbi"
+date: "8 de Abril de 2019"
+output: pdf_document
+fontsize: 12pt
+Subtitle: Statistical Learning
+documentclass: article
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, warning=FALSE)
+```
+
+```{r,warning=FALSE,message=FALSE} 
+library(caret)
+library(rpart.plot)
+library(randomForest)
+library(pROC)
+library(ROC632)
+library(gbm)
+library(ISLR)
+library(ada)
+```
+
+##1. Do a short exploratory data analysis in order to know some characteristics of each variable
+
+```{r}
+data <- as.data.frame(read.csv("soldat.csv",header = T,sep = ","))
+data$y<-ifelse(data$y==-1,0,1)
+data$y<-as.factor(data$y)
+```
+
+Percentage missing values
+
+```{r}
+p.m <- sum(is.na(data))/(dim.data.frame(data)[1]*dim.data.frame(data)[2])*100
+paste(round(p.m,2),"% missing values")
+data <- data[,-71]
+```
+
+We do a PCA analysisis to see if we can explain the variance of the original matrix using an approximate lower dimensional matrix.
+
+```{r}
+data.pca <- scale(data[,-72], scale = TRUE)
+princ <- princomp( as.matrix(data.pca))
+
+plot(cumsum(princ$sd^2)/sum(princ$sd^2), xlab = "N Components" , ylab = "% Explained Variance")
+abline(h=0.8, lty=2, col="red")
+
+plot(princ$scores[,1],princ$scores[,2], cex=0.3, 
+     col=data$y, asp=1, xlab = "Primer Componente", ylab = "Segundo Componente")
+```
+
+```{r}
+plot(princ$scores[,1],princ$scores[,3], cex=0.3, col=data$y, asp=1)
+```
+
+```{r}
+plot(princ$scores[,2],princ$scores[,3], cex=0.3, col=data$y, asp=1)
+```
+
+```{r}
+load.soldat <- princ$loadings
+
+
+par(mar = c(1,4,0,2), mfrow = c(6,1))
+load=load.soldat[abs(load.soldat)>1e-2]
+for(i in 1:6) barplot(load.soldat[,i], ylim = c(-1, 1))
+```
+
+##2.	Separate the data into 2 balanced partitions:  a training set (2,815 compounds) and a  test set (2,816 compounds). Use this same partition in the training phase (and validation phase if necessary) and the test phase of each of the sections that are presented below. Use the value 1234 as random seed to do the partition.
+
+```{r}
+set.seed(1234)
+pt <- 1/2
+index <- createDataPartition(y = data$y ,p = pt,list = FALSE) #data partition
+data_train <- data[-index,] #train set
+data_test <- data[index,] #test set
+```
+
+##3.	Fit a pruned single tree classifier to predict the aqueous solubility. Assess the performance  of the tree by using suitable metrics.
+
+```{r}
+ctrl <- trainControl(method = "repeatedcv",number = 10, repeats=3)
+single.tree <- train(y ~ ., 
+                     data = data_train,
+                     method="rpart",
+                     trControl=ctrl,
+                     metric="Accuracy",
+                     preProc= c("center","scale"))
+
+single.tree
+```
+
+And it's graphical representation is:
+
+```{r}
+prp(single.tree$finalModel,box.palette = "Reds",tweak = 1.2, main = "Single tree classification")
+```
+
+Predictions and performance analysis:
+
+```{r}
+pred <- predict(single.tree, data_test)
+
+confusionMatrix(pred,data_test$y)
+```
+
+We can also see the performance of the random forest with the ROC analysis:
+
+```{r}
+single.tree.roc <- roc(as.numeric(data_test$y),as.numeric(pred))
+
+plot(x=1-single.tree.roc$specificities, y=single.tree.roc$sensitivities, ylab="Sensitivity=True Positive Rates", xlab="1-Specificity = False Positive Rates", type="s", lwd=1, main="ROC Curve")
+clip(x1=0,x2=1,y1=0,y2=1)
+abline(a=0, b=1,col=2,lty=3)
+abline(v=0,col=1,lty=3)
+abline(h=1,col=1,lty=3)
+
+single.tree.roc$auc
+```
+
+##4. Fit a Random Forest (RF) classifier to predict the aqueous solubility. Tune the parameters: number of trees and number of variables in each tree, by implementing a grid search procedure. Assess the performance of RF using suitable metrics. Determine which variables are the most relevant in the solubility prediction.
+
+```{r}
+#method customization
+customRF <- list(type = "Classification", 
+                 library = "randomForest", 
+                 loop = NULL)
+
+customRF$parameters <- data.frame(parameter = c("mtry", "ntree"), 
+                                  class = rep("numeric", 2), 
+                                  label = c("mtry", "ntree"))
+
+customRF$grid <- function(x, y, len = NULL, search = "grid") {}
+
+customRF$fit <- function(x, y, wts, param, lev, last, weights, classProbs, ...) {
+  randomForest(x, y, mtry = param$mtry, ntree=param$ntree, ...)
+}
+
+customRF$predict <- function(modelFit, newdata, preProc = NULL, submodels = NULL)
+   predict(modelFit, newdata)
+
+customRF$prob <- function(modelFit, newdata, preProc = NULL, submodels = NULL)
+   predict(modelFit, newdata, type = "prob")
+
+customRF$sort <- function(x) x[order(x[,1]),]
+customRF$levels <- function(x) x$classes
+
+# train model
+ctrl.rf <- trainControl(method = "repeatedcv",number = 5, repeats=1) #reduced due to computational costs (5-fold cross-validation with one repetition) 
+tunegrid <- expand.grid(.mtry=c(2,5,10), .ntree=c(100, 250,500))
+set.seed(1234)
+random.forest <- train(y~., data=data_train, method=customRF, metric="Accuracy", trControl=ctrl.rf, preProc= c("center","scale"),tuneGrid = tunegrid)
+
+random.forest
+plot(random.forest)
+```
+
+Final random forest model:
+
+```{r}
+random.forest.final <- randomForest(y~.,data=data_train ,mtry=5, ntree = 100)
+random.forest.final
+
+varImpPlot(random.forest.final)
+
+```
+
+Performance of the random forest
+
+```{r}
+random.forest.pred <- predict(random.forest.final,data_test)
+
+confusionMatrix(random.forest.pred,data_test$y)
+```
+
+We can also see the performance of the random forest with the ROC analysis:
+
+```{r}
+random.forest.roc <- roc(as.numeric(data_test$y),as.numeric(random.forest.pred))
+
+plot(x=1-random.forest.roc$specificities, y=random.forest.roc$sensitivities, ylab="Sensitivity=True Positive Rates", xlab="1-Specificity = False Positive Rates", type="s", lwd=1, main="ROC Curve")
+clip(x1=0,x2=1,y1=0,y2=1)
+abline(a=0, b=1,col=2,lty=3)
+abline(v=0,col=1,lty=3)
+abline(h=1,col=1,lty=3)
+
+random.forest.roc$auc
+```
+
+##5. In view of the above metrics, compare the classifiers in 3) and 4).
+
+We can clearly see that the random forest obtains a better results in terms of accuracy in the classification of the data tested (8.95% more accuracy in the predictions).
+
+##6.	Apply the discrete AdaBoost algorithm (with an exponential loss function).
+
+###6.1.	Using "stumps" as classification trees compute the misclassification rates of both the learning set and the test set across 2,000 iterations of  AdaBoost.  Represent these error  as  a function of the number of boosting iterations. Due to computational limitations for the AdaBoost, we did only 200 iterations.
+
+```{r}
+AdaBoost <- ada(x=data_train[,-72],
+                y=data_train[,72],
+                loss="exponential",
+                iter=200, 
+                rpart.control(maxdepth = 1, cp = -1, minsplit=0))
+
+
+plot(AdaBoost)
+AdaBoost
+```
+
+Performance in the learning set:
+
+```{r}
+AdaBoost.pred.train <- predict(AdaBoost,newdata=data_train,n.trees=200)
+
+confusionMatrix(as.factor(AdaBoost.pred.train),data_train$y)
+```
+
+Performance in the test set:
+
+```{r}
+AdaBoost.pred.test <- predict(AdaBoost,newdata=data_test,n.trees=200)
+
+confusionMatrix(as.factor(AdaBoost.pred.test),data_test$y)
+```
+
+###6.2.	Compare the test-set misclassification rates attained by different ensemble classifiers based on trees of sizes: stumps, 4-node trees, 8-node trees, and 16-node trees.
+
+```{r}
+AdaBoost.stump=ada(x=data_train[,-72],
+                y=data_train[,72],
+                loss="exponential",
+                iter=50, 
+                rpart.control(maxdepth = 1, cp = -1, minsplit=0))
+
+AdaBoost.4=ada(x=data_train[,-72],
+                y=data_train[,72],
+                loss="exponential",
+                iter=50, 
+                rpart.control(maxdepth = 4, cp = -1, minsplit=0))
+
+AdaBoost.8=ada(x=data_train[,-72],
+                y=data_train[,72],
+                loss="exponential",
+                iter=50, 
+                rpart.control(maxdepth = 8, cp = -1, minsplit=0))
+
+AdaBoost.16=ada(x=data_train[,-72],
+                y=data_train[,72],
+                loss="exponential",
+                iter=50, 
+                rpart.control(maxdepth = 16, cp = -1, minsplit=0))
+
+```
+
+Stump Tree:
+
+```{r}
+plot(AdaBoost.stump)
+```
+
+4-node Tree:
+
+```{r}
+plot(AdaBoost.4)
+```
+
+8-node Tree:
+
+```{r}
+plot(AdaBoost.8)
+```
+
+16-node Tree:
+
+```{r}
+plot(AdaBoost.16)
+```
+
+Performance in the test set for each tree:
+
+Stump tree:
+
+```{r,warning=FALSE}
+AdaBoost.stump.test <- predict(AdaBoost.stump,newdata=data_test,n.trees=50)
+
+confusionMatrix(as.factor(AdaBoost.stump.test),data_test$y)
+```
+
+4-node tree:
+
+```{r,warning=FALSE}
+AdaBoost.4.test <- predict(AdaBoost.4,newdata=data_test,n.trees=50)
+
+confusionMatrix(as.factor(AdaBoost.4.test),data_test$y)
+```
+
+8-node tree:
+
+```{r,warning=FALSE}
+AdaBoost.8.test <- predict(AdaBoost.8,newdata=data_test,n.trees=50)
+
+confusionMatrix(as.factor(AdaBoost.8.test),data_test$y)
+```
+
+16-node tree:
+
+```{r,warning=FALSE}
+AdaBoost.16.test <- predict(AdaBoost.16,newdata=data_test,n.trees=50)
+
+confusionMatrix(as.factor(AdaBoost.16.test),data_test$y)
+```
+
+

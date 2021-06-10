@@ -1,0 +1,160 @@
+set FACT := GARY CLEV PITT;
+set MARK := FRA DET LAN WIN STL FRE LAF;
+set PROD := bands coils plate;
+set TIME := 1 2 3 4;
+set RESO := hours;
+
+param price_min = 0.75;  
+param price_max = 1.25;
+
+param avail := #modified: type of resource (hours) added
+hours CLEV 1   156
+hours CLEV 2   138
+hours CLEV 3   129
+hours CLEV 4   144
+hours GARY 1   143
+hours GARY 2   150
+hours GARY 3   160
+hours GARY 4   146
+hours PITT 1   149
+hours PITT 2   140
+hours PITT 3   142
+hours PITT 4   130
+;
+
+param inv0 :=
+CLEV bands   4473
+CLEV coils   3247
+CLEV plate   1167
+GARY bands   4123
+GARY coils   6090
+GARY plate    746
+PITT bands   8864
+PITT coils   4072
+PITT plate   1197
+;
+
+param rate := #modified: type of resource (hours) added
+hours CLEV bands   173
+hours CLEV coils   155
+hours CLEV plate   177
+hours GARY bands   197
+hours GARY coils   173
+hours GARY plate   191
+hours PITT bands   170
+hours PITT coils   179
+hours PITT plate   150
+;
+
+param demand_current [*,bands,*]
+:      1      2       3      4      :=
+FRA   1299   1992    4457   4000
+DET   7122   1057    3856   2315
+LAN   3980   7486    3178   6041
+WIN   5439   9362   10105   1241
+STL   1844    971     310   2951
+FRE   5675   6050    7247   6044
+LAF   6858   3991    2057   7736
+
+ [*,coils,*]
+:      1      2      3      4      :=
+FRA    984   1506   3371   3017
+DET   5396    799   2916   1746
+LAN   3015   5663   2404   4557
+WIN   4121   7081   7642    936
+STL   1397    735    234   2226
+FRE   4300   4576   5481   4559
+LAF   5196   3019   1555   5836
+
+ [*,plate,*]
+:      1      2      3      4      :=
+FRA    238    365    816    736
+DET   1308    193    706    425
+LAN    731   1374    582   1111
+WIN    999   1718   1852    228
+STL    338    178     56    543
+FRE   1042   1110   1328   1112
+LAF   1260    732    376   1423
+;
+
+param demand_response [*,*]
+:   bands coils plate    :=
+FRA   -84   -81   -99
+DET   -81   -81   -97
+LAN   -71   -61   -77
+WIN   -94   -67   -78
+STL   -51   -61   -70
+FRE   -98   -66   -86
+LAF   -59   -59   -91
+;
+
+param price_current [*] :=
+bands  259.15
+coils  290.72
+plate  216.64
+;
+
+param make_cost [CLEV,*,*] (tr)
+:   bands    coils    plate     :=
+1   166.15   145.38   124.61
+2   171.69   150.23   128.77
+3   177.23   155.07   132.92
+4   182.77   159.92   137.07
+
+ [GARY,*,*] (tr)
+:   bands    coils    plate     :=
+1   170.79   149.44   128.09
+2   176.48   154.42   132.36
+3   182.17   159.4    136.63
+4   187.86   164.38   140.9
+
+ [PITT,*,*] (tr)
+:   bands    coils    plate     :=
+1   177.92   155.68   133.44
+2   183.85   160.87   137.89
+3   189.78   166.06   142.34
+4   195.71   171.25   146.78
+;
+
+param trans_cost [CLEV,*,*]
+:     bands   coils   plate    :=
+FRA   93.25   69.94   46.63
+DET   55.34   41.51   27.67
+LAN   54.19   40.64   27.09
+WIN   93.73   70.3    46.87
+STL   58.54   43.91   29.27
+FRE   73.37   55.03   36.68
+LAF   68.22   51.17   34.11
+
+ [GARY,*,*]
+:     bands   coils   plate    :=
+FRA   71.93   53.95   35.96
+DET   75.66   56.74   37.83
+LAN   78.38   58.78   39.19
+WIN   69.16   51.87   34.58
+STL   51.6    38.7    25.8
+FRE   60.93   45.7    30.46
+LAF   78.4    58.8    39.2
+
+ [PITT,*,*]
+:     bands   coils   plate    :=
+FRA   80.44   60.33   40.22
+DET   56.49   42.37   28.24
+LAN   83.61   62.71   41.8
+WIN   75.9    56.92   37.95
+STL   62.59   46.94   31.29
+FRE   77.47   58.11   38.74
+LAF   98.05   73.54   49.03
+;
+
+param inv_cost :=
+CLEV bands   3.22
+CLEV coils   2.31
+CLEV plate   2.88
+GARY bands   4.06
+GARY coils   4.59
+GARY plate   4.55
+PITT bands   2.6
+PITT coils   4.82
+PITT plate   4.16
+;

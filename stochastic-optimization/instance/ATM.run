@@ -1,0 +1,74 @@
+# ----------------------------------------
+# THE ATM PROBLEM
+# EXTENSIVE FORM .RUN
+# ----------------------------------------
+
+reset;
+# OPTIMAL SOLUTION FOR THE COMPLETE PROBLEM (using CPLEX)
+
+model ATM.mod;
+data ATM.dat;
+
+option solver cplex;
+# ----------------------------------------
+# THE ATM PROBLEM .RUN
+# ----------------------------------------
+
+problem RP: P, x, y, Exceed;
+problem WS: DP, X, Y,Excees;
+problem ERP: EP, y, Exceedpar;
+
+#----------------------
+#SOLVING THE RP PROBLEM
+#----------------------
+
+solve RP;
+
+printf "\nRP SOLUTION\n";
+printf "--------------------|\n";
+display x;
+display y;
+
+#-----------
+#WS SOLUTION
+#-----------
+param WS_solution default 0;
+
+for {i in SCENE} {
+
+	let Chi := chi[i];
+	solve WS;
+	
+	let WS_solution := WS_solution + p[i]*DP;
+	
+	}
+
+printf "\nWS SOLUTION\n";
+printf "--------------------|\n";
+display WS_solution;
+
+#-----------
+#EV SOLUTION
+#-----------
+
+let Chi := sum {i in SCENE} p[i]*chi[i];
+solve WS;
+
+printf "\nEV SOLUTION\n";
+printf "--------------------|\n";
+display X;
+
+#------------
+#EEV SOLUTION
+#------------
+
+let Xpar := X;
+solve ERP;
+
+printf "\nEEV SOLUTION\n";
+printf "--------------------|\n";
+display EP;
+display X;
+
+#END-----------------------------------------------------
+#########################################################

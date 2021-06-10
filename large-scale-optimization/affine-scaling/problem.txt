@@ -1,0 +1,21 @@
+Implement the primal affine scaling algorithm, using a high-level language such as Matlab
+or Octave. Test the code using a set of linear optimization problems.
+
+The input parameters to the code will be the cost vector c, the constraints matrix A,
+and the right-hand-side vector b.  The constraints matrix A will have to be expanded with a new
+variable needed by the Big-M method.
+
+This assignment has to be done individually or in groups of two.
+You have to provide a compressed file (zip, rar or tgz) with the Matlab/Octave code, and a
+report (in pdf format) describing the characteristics of the linear problems tested
+(number of variables, constraints, and nonzero coefficients of the constrainst matrix),
+the results obtained (number of iterations, optimal objective value found) with your code
+and some standard code (such as Matlab's "linprog"). Comment those aspects you consider
+relevant to your code. In particular, comment on how the M value of the Big-M method is
+computed. Check the behaviour of the code when no scaling is considered, that is, when the
+scaling matrix is the identity. Does the algorithm work?
+
+
+You can test your code with Netlib problems obtained with the MPS to Matlab converter,
+or directly by dowloading Matlab versions of these problems from
+http://www.cise.ufl.edu/research/sparse/matrices/LPnetlib/index.html .

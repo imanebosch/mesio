@@ -1,0 +1,61 @@
+
+
+reset;
+model 03_Iris.mod;
+let m := 15;
+data data_N15.dat;
+option solver cplex;
+solve;
+display {i in M, j in M} x[i,j]>result2vars_N15.txt;
+display _total_solve_time >> result2vars_N15.txt;
+display _solve_elapsed_time >> result2vars_N15.txt;
+
+reset;
+model 03_Iris.mod;
+let m := 30;
+data data_N30.dat;
+option solver cplex;
+solve;
+display {i in M, j in M: x[i,j]=1} x[i,j]>result2vars_N30.txt;
+display _total_solve_time >> result2vars_N30.txt;
+display _solve_elapsed_time >> result2vars_N30.txt;
+
+reset;
+model 03_Iris.mod;
+let m := 60;
+data data_N60.dat;
+option solver cplex;
+solve;
+display {i in M, j in M: x[i,j]=1} x[i,j]>result2vars_N60.txt;
+display _total_solve_time >> result2vars_N60.txt;
+display _solve_elapsed_time >> result2vars_N60.txt;
+
+reset;
+model 03_Iris.mod;
+let m := 120;
+data data_N120.dat;
+option solver cplex;
+solve;
+display {i in M, j in M: x[i,j]=1} x[i,j]>result2vars_N120.txt;
+display _total_solve_time >> result2vars_N120.txt;
+display _solve_elapsed_time >> result2vars_N120.txt;
+
+reset;
+model 03_Iris.mod;
+let m := 150;
+data data_N150.dat;
+option solver cplex;
+solve;
+display {i in M, j in M: x[i,j]=1} x[i,j]>result2vars_N150.txt;
+display _total_solve_time >> result2vars_N150.txt;
+display _solve_elapsed_time >> result2vars_N150.txt;
+
+reset;
+model 03_Iris.mod;
+let m := 150;
+data iris4vars.dat;
+option solver cplex;
+solve;
+display {i in M, j in M: x[i,j]=1} x[i,j]>result4vars_N150.txt;
+display _total_solve_time >> result4vars_N150.txt;
+display _solve_elapsed_time >> result4vars_N150.txt;

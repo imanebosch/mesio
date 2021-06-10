@@ -1,0 +1,18 @@
+reset;
+model cuttingOGE.mod;
+data cuttingOGE.dat;
+data caps.dat;
+option solver cplex; # change appropriately if necessary
+
+
+problem PLAIN: xl,xx,I,total_flow,COST;
+
+solve PLAIN;
+
+for {(i,j) in A: xx[i,j]>0}{printf "%d %d %6.2f \n", i,j, xx[i,j] > flows.dat;}
+
+problem CAPS: xl,xx,I,total_flow,caps,COST;
+
+solve CAPS;
+
+for {(i,j) in A: xx[i,j]>0}{printf "%d %d %6.2f \n", i,j, xx[i,j] > flows2.dat;}

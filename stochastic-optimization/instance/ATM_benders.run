@@ -1,0 +1,99 @@
+# ----------------------------------------
+# BENDERS DECOMPOSITION FOR
+# THE ATM PROBLEM .RUN
+# ----------------------------------------
+
+reset;
+
+model ATM_benders.mod;
+data ATM.dat;
+
+option solver cplex;
+option cplex_options 'mipdisplay 2 mipinterval 100 primal';
+
+option omit_zero_rows 0;
+option display_eps .000001;
+
+problem Master: MP, z, x, Cut_Defn;
+problem Sub: mu, SubP, const1;
+
+suffix unbdd OUT;
+
+let nCUT := 0;
+let z := -Infinity;
+let X := 50; #initial solution
+
+param GAP default Infinity;
+
+repeat { 
+
+printf "\nITERATION %d\n", nCUT+1;
+printf "------------------------------------------------------------|\n";
+
+printf "\nSOLVING SUB PROBLEM\n";
+printf "--------------------------------------------|\n\n";
+
+   solve Sub;
+   printf "\n";
+
+   if Sub.result = "unbounded" then { printf "UNBOUNDED\n";
+      let nCUT := nCUT + 1; # we include a feasibility cut
+      let cut_type[nCUT] := "ray";
+      let {i in SCENE} MU[i,nCUT] := mu[i].unbdd; 
+      # elements of the extreme ray provided by cplex
+      
+      #Results for each iteration and starting point x=50		    
+	  printf "%3i %12.5f %12.5f %12.5f %12.5f\n", 
+		nCUT+1,
+		GAP, 
+		SubP + c*X, 
+		MP,
+		X > BD_Alg_Res.txt;
+	  ####################################################
+      }
+
+   else {
+      
+      let GAP := min (GAP, SubP + c*X - MP);
+         
+      #Results for each iteration and starting point x=50		    
+	  printf "%3i %12.5f %12.5f %12.5f %12.5f\n", 
+		nCUT+1,
+		GAP, 
+		SubP + c*X, 
+		MP,
+		X > BD_Alg_Res.txt;
+	  ####################################################
+      
+	  if SubP <= z + 0.00001 then break; 
+      
+      option display_1col 0;
+      display GAP, SubP;
+      let nCUT := nCUT + 1;
+      let cut_type[nCUT] := "point";
+      let {i in SCENE} MU[i,nCUT] := mu[i]; # Optimal extreme point
+      }
+      
+      
+printf "\nSOLVING MASTER PROBLEM\n";
+printf "--------------------------------------------|\n\n";
+
+   solve Master;
+   printf "\n";
+   option display_1col 20;
+   display x;
+
+   let X := x;    
+} until nCUT=500; #max number of iterations
+
+printf "\nOPTIMAL SOLUTION\n";
+display x;
+
+printf "\nSECOND STGE SOLUTION\n";
+display const1;
+
+printf "\nOBJECTIVE FUNCTION\n";
+display MP;
+
+#END-----------------------------------------------------
+#########################################################

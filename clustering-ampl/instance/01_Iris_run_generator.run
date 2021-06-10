@@ -1,0 +1,84 @@
+reset;
+
+# Small number of observations
+for{j in {15}} {
+
+        printf "\n\nreset;" > 02_Iris.run;
+        printf "\nmodel 03_Iris.mod;" > 02_Iris.run;
+        printf "\nlet m := %s",j > 02_Iris.run;
+        printf "\;" > 02_Iris.run;
+                
+        printf "\ndata data_N%s",j > 02_Iris.run;
+        printf "\.dat;" > 02_Iris.run;
+
+        printf "\noption solver cplex;" > 02_Iris.run;
+        printf "\nsolve;" > 02_Iris.run;
+        
+        printf "\ndisplay {i in M, j in M} x[i,j]>result2vars_N%s",j > 02_Iris.run;
+        printf "\.txt;" > 02_Iris.run;
+        
+        # Computational time
+        printf "\ndisplay _total_solve_time >> result2vars_N%s",j > 02_Iris.run;
+        printf "\.txt;" > 02_Iris.run;    
+        
+        # Real time
+        printf "\ndisplay _solve_elapsed_time >> result2vars_N%s",j > 02_Iris.run;
+        printf "\.txt;" > 02_Iris.run;    
+        
+}
+
+# Large number of observations
+set LOOP = {30, 60, 120, 150};
+
+for{j in LOOP}{
+
+        printf "\n\nreset;" > 02_Iris.run;
+        printf "\nmodel 03_Iris.mod;" > 02_Iris.run;
+        printf "\nlet m := %s",j > 02_Iris.run;
+        printf "\;" > 02_Iris.run;
+        
+        printf "\ndata data_N%s",j > 02_Iris.run;
+        printf "\.dat;" > 02_Iris.run;
+        
+        printf "\noption solver cplex;" > 02_Iris.run;
+        printf "\nsolve;" > 02_Iris.run;
+        
+        printf "\ndisplay {i in M, j in M: x[i,j]=1} x[i,j]>result2vars_N%s",j > 02_Iris.run;
+        printf "\.txt;" > 02_Iris.run;
+        
+        # Computational time
+        printf "\ndisplay _total_solve_time >> result2vars_N%s",j > 02_Iris.run;
+        printf "\.txt;" > 02_Iris.run;    
+        
+        # Real time          
+        printf "\ndisplay _solve_elapsed_time >> result2vars_N%s",j > 02_Iris.run;
+        printf "\.txt;" > 02_Iris.run;    
+        
+}
+
+# Using 4 variables
+
+for{j in {150}} {
+
+        printf "\n\nreset;" > 02_Iris.run;
+        printf "\nmodel 03_Iris.mod;" > 02_Iris.run;
+        printf "\nlet m := %s",j > 02_Iris.run;
+        printf "\;" > 02_Iris.run;
+        
+        printf "\ndata iris4vars" > 02_Iris.run;
+        printf "\.dat;" > 02_Iris.run;
+        
+        printf "\noption solver cplex;" > 02_Iris.run;
+        printf "\nsolve;" > 02_Iris.run;
+        
+        printf "\ndisplay {i in M, j in M: x[i,j]=1} x[i,j]>result4vars_N%s",j > 02_Iris.run;
+        printf "\.txt;" > 02_Iris.run;
+        
+        # Computational time
+        printf "\ndisplay _total_solve_time >> result4vars_N%s",j > 02_Iris.run;
+        printf "\.txt;" > 02_Iris.run;    
+        
+        # Real time          
+        printf "\ndisplay _solve_elapsed_time >> result4vars_N%s",j > 02_Iris.run;
+        printf "\.txt;" > 02_Iris.run;    
+}

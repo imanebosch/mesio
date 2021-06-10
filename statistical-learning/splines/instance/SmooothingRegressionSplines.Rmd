@@ -1,0 +1,255 @@
+---
+title: "Smoothing and Regression Splines"
+author: "Ignasi Mañé, Antoni Company & Chiara Barbi"
+date: "19 de marzo de 2019"
+output: pdf_document
+fontsize: 12pt
+Subtitle: Statistical Learning
+documentclass: article
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+\section{Introduction}
+
+The file bikes.Washington.Rdata contains information on the bike-sharing rental service in Washington D.C., USA, corresponding to years 2011 and 2012. This file contains only one data frame, bikes, with 731 rows (one for each day of years 2011 and 2012, that was a leap year) and 9 columns:
+
+* instant: row index, going from 1 to 731.
+* yr: year (0: 2011, 1:2012).
+* dayyr: day of the year (from 1 to 365 for 2011, and from 1 to 366 for 2012).
+* weekday: day of the week (0 for Sunday, 1 for Monday, ..., 6 for Saturday).
+* workingday: if day is neither weekend nor holiday is 1, otherwise is 0. 
+* temp: temperature in Celsius.
+* hum: humidity in %.
+* windspeed: wind speed in miles per hour.
+* cnt: count of total rental bikes. In this exam we consider this variable as continuous.
+
+In the following chunk we will call the libraries used throughout the assignment.$\vspace{0.2cm}$
+
+```{r,message=FALSE,warning=FALSE}
+library(ggplot2)
+library(splines)
+library(tidyverse)
+library(splines)
+```
+
+\section{Nonparametric regression of cnt as a function of instant}
+
+### 1. Consider the nonparametric regression of cnt as a function of instant. Estimate the regression function m(instant) of cnt as a function of instant using a cubic regression splines estimated with the R function smooth.splines and choosing the smoothing parameter by Generalized Cross Validation.
+
+First, we will proceed by uploading the data to the R environment and defining two auxiliary parameters for the variables cnt and instant.$\vspace{0.2cm}$
+
+```{r}
+load("bikes.Washington.RData")
+cnt <- bikes$cnt
+instant <- bikes$instant
+```
+
+Once we have uploaded the data we will proceed with a simple representation of the cnt as a function of instant to see the behavior of the parameters.$\vspace{0.2cm}$
+
+```{r}
+ggplot(bikes)+geom_point(aes(instant,cnt), col='blue')+
+  ggtitle(label="Plot of cnt vs. instant")+
+  theme(plot.title = element_text(hjust = 0.5))
+```
+
+Once we have seen the data, we will proceed with the questions for this exercise.
+
+**a) Which is the value of the chosen penalty parameter $\lambda$?**
+
+We have chosen $\lambda$ by applying the generalized cross-validation for the data to analyse, to obtain its value we applied the function smooth.spline() and we imposed cv=FALSE to do the generalized cross-validation.$\vspace{0.2cm}$
+
+```{r}
+s.gcv <- smooth.spline(x = instant,y = cnt,cv=FALSE)
+```
+
+Where the optimal value for $\lambda$ is: $\vspace{0.2cm}$
+
+```{r}
+s.gcv$lambda
+```
+
+**b)	Which is the corresponding equivalent number of degrees of freedom df?**
+
+The function smooth.spline() used before also gives us the value for the degrees of freedom, where $df$ will be: $\vspace{0.2cm}$
+
+```{r}
+s.gcv$df
+```
+
+**c)	How many knots have been used?**
+
+```{r}
+s.gcv$fit$nk - 2
+```
+
+**d)	Give a graphic with the scatter plot and the estimated regression function m(instant).**
+
+```{r,warning=FALSE}
+
+ggplot(bikes)+geom_point(aes(instant,cnt), col='blue')+
+  ggtitle(label="Estimated Spline Regression function over original data")+
+  theme(plot.title = element_text(hjust = 0.5))+
+  geom_line(data = as.data.frame(s.gcv$x,s.gcv$y),
+            aes(x =s.gcv$x,y =s.gcv$y),color="black",size=1)
+
+```
+
+**e) Estimate now m(instant) by unpenalized regression splines combining the R functions bs and lm, using the knots my.knots <- quantile(instant,((1:n.knots)-.5)/n.knots) where n.knots is the previous value of df minus 4.**
+
+```{r}
+n.knots <- s.gcv$df-4
+my.knots <- quantile(instant,((1:n.knots)-0.5)/n.knots)
+my.knots <- my.knots[-c(1,length(my.knots))]
+```
+
+Once the data is prepared, we can proceed computing the cubic B-Spline basis used for the posterior lm() of cnt as a function of the basis. $\vspace{0.2cm}$
+
+```{r}
+basis <- bs(x=instant,knots = my.knots,intercept = TRUE,degree = 3)
+```
+
+Then, we finally proceed to compute the lm(). $\vspace{0.2cm}$
+
+```{r}
+lm.bs <- lm(cnt~basis-1)
+```
+
+If we summarize the results from the lm() we can see that: $\vspace{0.2cm}$
+
+```{r}
+summary(lm.bs)
+```
+
+The model adjusted is highly significant, and only a few bases could be discarded for having a p-value under the 0.05.
+
+**f ) Give a graphic with the scatter plot and the two estimated regression functions.**
+
+```{r,message=FALSE,warning=FALSE}
+ggplot(bikes)+geom_point(aes(instant,cnt), col='grey')+
+  ggtitle(label="Comparision of Penalyzed vs Unpenalyzed Regression Splines")+
+  theme(plot.title = element_text(hjust = 0.5))+
+  geom_line(data = as.data.frame(s.gcv$x,s.gcv$y),aes(x =s.gcv$x,y =s.gcv$y),color="black",size=1)+
+  geom_line(aes(x=instant,y=lm.bs$fitted.values),color="red",size=1)
+  
+```
+
+\section{Nonparametric logistic regression using splines}
+
+### 2. Nonparametric logistic regression using splines with a IRWLS procedure. The script IRWLS logistic regression.R includes the definition of the function logistic.IRWLS.splines performing non-parametric logistic regression using splines with a IRWLS procedure. The basic syntax is the following: logistic.IRWLS.splines(x=..., y=..., x.new=..., df=..., plts=TRUE) where the arguments are the explanatory variable x, the 0-1 response variable y, the vector x.new of new values of variable x where we want to predict the probability of y being 1 given that x is equal to x.new, the equivalent number of parameters (or model degrees of freedom) df, and the logical plts indicating if plots are desired or not. Define a new variable cnt.5000 taking the value 1 for days such that the number of total rental bikes is larger than or equal to 5000, on 0 otherwise.
+
+**a)	Use the function logistic.IRWLS.splines to fit the non-parametric binary regression cnt.5000 as a function of the temperature, using df=6. In which range of temperatures is Pr(cnt >= 5000|temp) larger than 0,5?**
+
+First we have to upload the script "IRWLS_logistic_regression.R" in order to get the function logistic.IRWLS.splines() $\vspace{0.2cm}$
+
+```{r}
+source("IRWLS_logistic_regression.R")
+```
+
+Once we have the function uploaded, we also have to define the parameters for the non-parametric regression, where: $\vspace{0.2cm}$
+
+```{r}
+temp <- bikes$temp #x axis
+#and the response variable is defined as follows:
+cnt.5000 = ifelse(bikes$cnt>=5000,1,0)
+```
+
+We will represent a plot in order to see the data for the non-parametric regression: $\vspace{0.2cm}$
+
+```{r,message=FALSE,warning=FALSE}
+ggplot(as.data.frame(temp,cnt.5000))+geom_point(aes(temp,cnt.5000), col='blue',alpha=0.3)+
+  ggtitle(label="Data for the non-parametric regression of cnt. 5000 vs temperature")+theme(plot.title = element_text(hjust = 0.5))
+```
+
+Once we have seen the behavior of the data, we can proceed with the non-parametric regression with the logistic function with df=6. $\vspace{0.2cm}$
+
+```{r}
+log.reg <- logistic.IRWLS.splines(y=cnt.5000,x = temp, x.new = temp, df = 6, plts = F)
+```
+
+Where if we analyse the results of the regression we will see that: $\vspace{0.2cm}$
+
+```{r,warning=FALSE}
+ggplot(as.data.frame(temp,cnt.5000))+
+  geom_point(aes(temp,cnt.5000), col='blue',alpha=0.3)+
+  ggtitle(label="Non-parametric Regression")+
+  theme(plot.title = element_text(hjust = 0.5))+
+  geom_line(data = as.data.frame(temp,log.reg$fitted.values),
+            aes(temp,log.reg$predicted.values),color='black',size=1)
+```
+
+Where the range of the percentage of temperature which are larger than cnt.5000 >= 0.5 is the following: $\vspace{0.2cm}$
+
+```{r}
+range.0.5 <- range(temp[log.reg$fitted.values>=0.5])
+range.0.5
+```
+
+If we analyse the results over the previous plot: $\vspace{0.2cm}$
+
+```{r,warning=FALSE,message=FALSE}
+ggplot(as.data.frame(temp,cnt.5000))+geom_point(aes(temp,cnt.5000), col='blue',alpha=0.3)+
+  ggtitle(label="Non-parametric Regression")+theme(plot.title = element_text(hjust = 0.5))+
+  geom_line(data = as.data.frame(temp,log.reg$fitted.values),
+            aes(temp,log.reg$predicted.values),color='black',size=1)+
+  geom_vline(xintercept = range.0.5[1],color='red')+
+  geom_vline(xintercept = range.0.5[2],color='red')
+```
+
+**b) (Optional) Choose the parameter df by k-fold cross validation with k = 5 and using df.v = 3:15 as the set of possible values for df.**
+
+For this exercise we will use the same parameters as before, but, we also have to define a sequence of the degrees of freedom in order to obtain the optimal $df^*$ by using the 5-fold cross-validation method.
+
+```{r}
+df.s <- seq(3,15,by=1)
+k <- 5
+```
+
+Once we have defined the degrees of freedom and the method of k-fold cross-validation, we will proceed to compute cross-validation in order to obtain the optimal value for the degrees of freedom.
+
+To compute the k-fold cross-validation we have implemented the following code, which mesures the accuracy in the predictions (the same as for the assignment of the delivery ROC) of the regression as a reference. $\vspace{0.2cm}$
+
+```{r}
+set.seed(1994)
+accuracy <- NULL
+
+for (i in 1:length(df.s)){
+  
+  #folds definition
+  folds <- as.numeric(sample(rep(1:k,length.out = length(temp))))
+  acc.df.iteration <- NULL
+  
+  for (j in 1:k ){
+    
+    #validation data
+    x.val <- temp[which(folds == j)]
+    y.val <- cnt.5000[which(folds == j)]
+    #training data
+    x.train <- temp[which(folds != j)]
+    y.train <- cnt.5000[which(folds != j)]
+    
+    #regression estimation for each df value
+    log.reg.cv <- logistic.IRWLS.splines(x = x.train,y = y.train,x.new = x.val,df = df.s[i],plts = FALSE)
+    
+    #accuracy in the regression
+    acc.table <- table(y.val,ifelse(log.reg.cv$predicted.values>0.5,1,0))
+    acc.df.iteration[j] <- (acc.table[1,1]+acc.table[2,2])/sum(acc.table)
+  }
+  
+  accuracy[i] <- mean(acc.df.iteration)
+}
+
+```
+
+We plot the results of the iteration process: $\vspace{0.2cm}$
+
+```{r warning=FALSE}
+ggplot(as.data.frame(df.s,accuracy))+
+  geom_point(aes(df.s,accuracy))+
+  geom_line(data=as.data.frame(df.s,accuracy),aes(df.s,accuracy))+ 
+  ggtitle(label="Accuracy in the prediction")+
+  theme(plot.title = element_text(hjust = 0.5))+
+  geom_vline(xintercept = df.s[which.max(accuracy)],color='red')
+```

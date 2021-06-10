@@ -1,0 +1,160 @@
+##################################
+### DANTZIG ALGORITHM RUN FILE ###
+##################################
+
+printf "\nSOLVING THE OPTIMIZATION PROBLEM WITHOUT RESTRICTIONS\n";
+printf "-----------------------------------------------------------------------|\n\n";
+
+	reset;
+	
+	model cuttingOGE.mod;
+	data cuttingOGE.dat;
+	option solver cplex;
+	
+	problem PLAIN: xl,xx,I,total_flow,COST;
+	
+		solve PLAIN;		
+		for {(i,j) in A: xx[i,j]>0}{printf "%d %d %6.2f \n", i,j, xx[i,j] > flows.txt;}
+		
+		printf "\nTotal Flows:\n";
+		option display_width 150;
+		display xx;
+		#Print final Total Flows
+		display xx > total_flow_un.txt;	
+	
+		printf "Total Flow per origin:\n";
+		option display_width 150;
+		display xl;
+		#Print final Origin Flows
+		display xl > Origin_flow_un.txt;			
+		
+printf "\nSOLVING THE OPTIMIZATION PROBLEM WITH RESTRICTIONS\n";
+printf "-----------------------------------------------------------------------|\n\n";
+		
+	data caps.dat; #new restrictions
+	problem CAPS: xl,xx,I,total_flow,caps,COST;
+	
+		solve CAPS;	
+		for {(i,j) in A: xx[i,j]>0}{printf "%d %d %6.2f \n", i,j, xx[i,j] > flows2.txt;}
+		
+		printf "\nTotal Flows:\n";
+		option display_width 150;
+		display xx;
+		
+		printf "Total Flow per origin:\n";
+		option display_width 150;
+		display xl;
+
+
+printf "\nSOLVING DANTZIG CUTTING PLANE ALGORITHM\n";
+printf "-----------------------------------------------------------------------|\n\n";
+
+	reset; #reset to load new data and models
+
+	model cuttingOGEm.mod;
+	data cuttingOGEm.dat;
+	data caps.dat;
+	option solver cplex; 
+		
+	problem MP: z,mu0,cuts,Z;	
+	problem w_aval: xl,xx,I,art,total_flow,w;
+	
+	param eps := 1.0e-6;	# tolerance	to stop	
+
+	#initial value of artificial arcs for injection nodes
+	let {o in artN,l in O} art1X[o,l,1]:=50;
+	#initial value of artifical arcs for consuming nodes
+	let {o in artN, i in N, l in O} art2X[o,i,l,1]:=t[i,l];
+
+	repeat {
+		
+		printf "\nITERATION %d\n", nCUT0;
+		printf "--------------------------------------------------------|\n";
+		
+		printf "\nSOLVING PROBLEM f(z)\n\n";
+	
+		solve MP;	
+		let  {(i,j) in A} mu[i,j] := mu0[i,j];
+		
+		printf "\nSOLVING PROBLEM f(x)\n\n";
+		
+		solve w_aval;  
+		
+	    let YY[nCUT0]:= 0;
+	
+		let {(i,j) in A} xxX[i,j,nCUT0] := xx[i,j];
+		let {o in artN ,l in O} art1X[o,l,nCUT0] := art1[o,l];
+		let {o in artN, i in N, l in O } art2X[o,i,l,nCUT0] := art2[o,i,l];
+				
+		#Print results of iteration k
+		printf "%3i %12.2f %12.2f %12.2f\n",
+				nCUT0, 
+				z,
+				w,
+				sum {(i,j) in A} c[i,j]*xx[i,j] > CP_Iter_res.txt; 
+		############################################################
+		
+		printf "\nViolated capacities: \n";
+		display {(i,j) in A: y[i,j]<1000} xx[i,j], {(i,j) in A: y[i,j]<1000} y[i,j];
+		
+		printf "\Existent flow in artificial arcs:\n";
+		display {o in artN, l in O: art1[o,l]>0} art1[o,l];
+		
+		printf "\Existent flow in artificial arcs:\n";
+		display {o in artN, i in N, l in O: art2[o,i,l]>0} art2[o,i,l];		
+		
+		
+		if z-w <= eps then break; #gap
+		
+		let nCUT0:=nCUT0+1; #next cut
+	    
+	 } until nCUT0 = Niter;
+	 
+printf "\nFINAL CUTTING PLANE RESULTS %d\n", nCUT0;
+printf "-----------------------------------------------------------------------|\n\n";
+	
+	printf "Upper bound z: %12.2f\n",z;
+	printf "Lower bound w: %12.2f\n\n",w;
+	printf "Lagrange multipliers:\n";
+	option display_width 150;
+	display mu;	
+	#Print final Lagrange Multipliers
+	display mu > Lagrange_mult.txt;
+	
+	printf "Total Flows:\n",w;
+	option display_width 150;
+	display xx;
+	#Print final Total Flows
+	display xx > total_flow.txt;	
+	
+	printf "Total Flow per origin:\n";
+	option display_width 150;
+	display xl;
+	#Print final Origin Flows
+	display xl > Origin_flow.txt;
+	
+	printf "\nViolated capacities: \n";
+	display {(i,j) in A: y[i,j]<1000} xx[i,j], {(i,j) in A: y[i,j]<1000} y[i,j];
+	
+printf "\nSOLVING GENERALIZED LPP\n";
+printf "-----------------------------------------------------------------------|\n\n";
+
+	
+	problem lp: glpp, glpp_cap, sum_alpha, alpha; #glpp_cap;
+	solve lp;
+	
+	printf "\nFinal values of alpha\n";
+	display alpha;
+	display {l in 1..nCUT0} cuts[l]; 
+	
+	printf "\Final flow values: \n";
+	display {(i,j) in A} xfin[i,j];
+
+	printf "\Violated capacities:\n";
+	display {(i,j) in A: y[i,j]<1000} xfin[i,j], {(i,j) in A: y[i,j]<1000} y[i,j];
+	
+	printf "\Final Objective Function:\n";
+	display sum {(i,j) in A} c[i,j]*xfin[i,j];
+	
+	
+

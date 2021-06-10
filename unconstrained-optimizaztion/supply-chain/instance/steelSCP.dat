@@ -1,0 +1,2177 @@
+::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
+Begin dataset number  1
+::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
+
+Optimal solution
+::::::::::::::::
+
+MINOS 5.51: optimal solution found.
+461 iterations, objective 22643550.87
+Nonlin evals: obj = 838, grad = 837.
+
+Make['GARY',p,1] [*] :=
+bands  18869.9
+coils   8015.68
+plate   1727.16
+;
+
+Trans['GARY',j,'coils',4] [*] :=
+FRA  5925.02
+DET     0
+LAN     0
+WIN   775.632
+STL  3661.99
+FRE     0
+LAF  3988.02
+;
+
+
+Parameters
+::::::::::
+
+set FACT := GARY CLEV PITT;
+
+set MARK := FRA DET LAN WIN STL FRE LAF;
+
+set PROD := bands coils plate;
+
+set TIME := 1 2 3 4;
+
+avail :=
+CLEV 1   123
+CLEV 2   139
+CLEV 3   132
+CLEV 4   146
+GARY 1   165
+GARY 2   121
+GARY 3   156
+GARY 4   160
+PITT 1   128
+PITT 2   126
+PITT 3   123
+PITT 4   161
+;
+
+inv0 :=
+CLEV bands   5564
+CLEV coils   7721
+CLEV plate   2480
+GARY bands   4157
+GARY coils   5322
+GARY plate   2457
+PITT bands   5231
+PITT coils   3189
+PITT plate   3824
+;
+
+rate :=
+CLEV bands   197
+CLEV coils   176
+CLEV plate   180
+GARY bands   166
+GARY coils   190
+GARY plate   189
+PITT bands   198
+PITT coils   177
+PITT plate   165
+;
+
+demand_current [*,bands,*]
+:      1      2      3      4      :=
+FRA   2268   4592   5809   7452
+DET    499   4679   4807   8719
+LAN   2837   2383   4732   3273
+WIN   5826   5496   2831    146
+STL   4731   1737   1304   2859
+FRE   5523    621   5185   5418
+LAF   5039   5635   1808   2410
+
+ [*,coils,*]
+:      1      2      3      4      :=
+FRA   1845   3660   4706   5982
+DET    406   3729   3893   6999
+LAN   2307   1900   3833   2627
+WIN   4739   4381   2293    117
+STL   3848   1384   1056   2295
+FRE   4492    495   4200   4349
+LAF   4099   4492   1464   1935
+
+ [*,plate,*]
+:      1      2      3      4      :=
+FRA   1044   2072   2666   3380
+DET    229   2112   2206   3954
+LAN   1306   1076   2172   1484
+WIN   2682   2481   1299     65
+STL   2178    783    598   1296
+FRE   2542    280   2380   2457
+LAF   2320   2543    829   1093
+;
+
+demand_response [*,*]
+:   bands coils plate    :=
+FRA   -54   -52   -92
+DET   -75   -92   -94
+LAN   -61   -71   -57
+WIN   -60   -83   -95
+STL   -80   -88   -96
+FRE   -96   -79   -82
+LAF   -93   -94   -80
+;
+
+price_current [*] :=
+bands  298.5
+coils  277.69
+plate  203.8
+;
+
+price_min = 0.75
+price_max = 1.25
+
+make_cost [CLEV,*,*] (tr)
+:   bands    coils    plate     :=
+1   180.4    157.85   135.3
+2   186.41   163.11   139.81
+3   192.42   168.37   144.32
+4   198.44   173.63   148.83
+
+ [GARY,*,*] (tr)
+:   bands    coils    plate     :=
+1   151.16   132.26   113.37
+2   156.19   136.67   117.15
+3   161.23   141.08   120.92
+4   166.27   145.49   124.7
+
+ [PITT,*,*] (tr)
+:   bands    coils    plate     :=
+1   176.65   154.57   132.49
+2   182.54   159.72   136.91
+3   188.43   164.88   141.32
+4   194.32   170.03   145.74
+;
+
+trans_cost [CLEV,*,*]
+:     bands   coils   plate    :=
+FRA   61.13   45.85   30.57
+DET   99.1    74.33   49.55
+LAN   67.39   50.54   33.69
+WIN   86.53   64.9    43.27
+STL   77.11   57.83   38.56
+FRE   72.34   54.26   36.17
+LAF   79.93   59.95   39.96
+
+ [GARY,*,*]
+:     bands   coils   plate    :=
+FRA   54.44   40.83   27.22
+DET   84.89   63.67   42.45
+LAN   98.7    74.03   49.35
+WIN   87.85   65.89   43.92
+STL   83.38   62.54   41.69
+FRE   72.94   54.71   36.47
+LAF   54.57   40.92   27.28
+
+ [PITT,*,*]
+:     bands   coils   plate    :=
+FRA   52.16   39.12   26.08
+DET   61.94   46.45   30.97
+LAN   89.32   66.99   44.66
+WIN   99.44   74.58   49.72
+STL   78.71   59.04   39.36
+FRE   52.87   39.65   26.44
+LAF   93.77   70.33   46.89
+;
+
+inv_cost :=
+CLEV bands   4.23
+CLEV coils   4.22
+CLEV plate   2.78
+GARY bands   3.7
+GARY coils   4.02
+GARY plate   3.75
+PITT bands   2.38
+PITT coils   4.69
+PITT plate   4.54
+;
+
+::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
+End dataset number  1
+::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
+
+::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
+Begin dataset number  2
+::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
+
+Optimal solution
+::::::::::::::::
+
+MINOS 5.51: optimal solution found.
+380 iterations, objective 28001322.99
+Nonlin evals: obj = 724, grad = 723.
+
+Make['GARY',p,1] [*] :=
+bands  24507.2
+coils   1866.7
+plate     73.6356
+;
+
+Trans['GARY',j,'coils',4] [*] :=
+FRA   562
+DET   523.514
+LAN     0
+WIN    85.1836
+STL     0
+FRE  1241
+LAF   464.02
+;
+
+
+Parameters
+::::::::::
+
+set FACT := GARY CLEV PITT;
+
+set MARK := FRA DET LAN WIN STL FRE LAF;
+
+set PROD := bands coils plate;
+
+set TIME := 1 2 3 4;
+
+avail :=
+CLEV 1   152
+CLEV 2   137
+CLEV 3   165
+CLEV 4   122
+GARY 1   167
+GARY 2   158
+GARY 3   135
+GARY 4   168
+PITT 1   151
+PITT 2   158
+PITT 3   162
+PITT 4   128
+;
+
+inv0 :=
+CLEV bands    3060
+CLEV coils    3007
+CLEV plate    9677
+GARY bands    2533
+GARY coils    2509
+GARY plate   12556
+PITT bands    4990
+PITT coils    1611
+PITT plate    6103
+;
+
+rate :=
+CLEV bands   163
+CLEV coils   159
+CLEV plate   167
+GARY bands   156
+GARY coils   198
+GARY plate   155
+PITT bands   161
+PITT coils   171
+PITT plate   159
+;
+
+demand_current [*,bands,*]
+:      1      2      3      4      :=
+FRA   3722    560   3654   1538
+DET    625   3735   1755    660
+LAN    517   4893   2738   1840
+WIN   3086   1062    411    158
+STL   3273     18    269   5044
+FRE    806    182   4308   2352
+LAF   3066   4096   1738   1805
+
+ [*,coils,*]
+:      1      2      3      4      :=
+FRA   2102    316   2034    878
+DET    353   2110    977    377
+LAN    291   2765   1524   1051
+WIN   1742    599    229     90
+STL   1848     10    149   2880
+FRE    455    102   2398   1343
+LAF   1731   2314    967   1031
+
+ [*,plate,*]
+:      1       2       3       4      :=
+FRA   9209    1387    9050    3804
+DET   1549    9235    4347    1634
+LAN   1280   12098    6781    4551
+WIN   7636    2626    1020     393
+STL   8099      47     667   12469
+FRE   1994     451   10670    5816
+LAF   7588   10128    4305    4464
+;
+
+demand_response [*,*]
+:   bands coils plate    :=
+FRA   -56   -69   -75
+DET   -95   -86   -79
+LAN   -88   -89   -51
+WIN   -77   -52   -71
+STL   -74   -77   -55
+FRE   -82   -76   -62
+LAF   -89   -55   -85
+;
+
+price_current [*] :=
+bands  287.48
+coils  216.12
+plate  269.3
+;
+
+price_min = 0.75
+price_max = 1.25
+
+make_cost [CLEV,*,*] (tr)
+:   bands    coils    plate     :=
+1   156.98   137.36   117.73
+2   162.21   141.93   121.66
+3   167.44   146.51   125.58
+4   172.68   151.09   129.51
+
+ [GARY,*,*] (tr)
+:   bands    coils    plate     :=
+1   153.48   134.29   115.11
+2   158.59   138.77   118.94
+3   163.71   143.24   122.78
+4   168.82   147.72   126.62
+
+ [PITT,*,*] (tr)
+:   bands    coils    plate     :=
+1   197.21   172.56   147.91
+2   203.79   178.31   152.84
+3   210.36   184.07   157.77
+4   216.93   189.82   162.7
+;
+
+trans_cost [CLEV,*,*]
+:     bands   coils   plate    :=
+FRA   74.83   56.13   37.42
+DET   86.34   64.76   43.17
+LAN   68.51   51.38   34.25
+WIN   94.81   71.11   47.4
+STL   59.05   44.29   29.52
+FRE   95.47   71.6    47.73
+LAF   93.43   70.07   46.72
+
+ [GARY,*,*]
+:     bands   coils   plate    :=
+FRA   69.26   51.95   34.63
+DET   50.03   37.52   25.01
+LAN   71.12   53.34   35.56
+WIN   52.56   39.42   26.28
+STL   77.15   57.86   38.57
+FRE   69.16   51.87   34.58
+LAF   61.1    45.82   30.55
+
+ [PITT,*,*]
+:     bands   coils   plate    :=
+FRA   86.58   64.94   43.29
+DET   79.82   59.87   39.91
+LAN   78.93   59.2    39.46
+WIN   74.85   56.14   37.43
+STL   59.84   44.88   29.92
+FRE   71.1    53.32   35.55
+LAF   55.87   41.9    27.93
+;
+
+inv_cost :=
+CLEV bands   2.7
+CLEV coils   2.21
+CLEV plate   3.41
+GARY bands   2.14
+GARY coils   2.79
+GARY plate   3.55
+PITT bands   4.89
+PITT coils   4.73
+PITT plate   2.29
+;
+
+::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
+End dataset number  2
+::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
+
+::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
+Begin dataset number  3
+::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
+
+Optimal solution
+::::::::::::::::
+
+MINOS 5.51: optimal solution found.
+443 iterations, objective 21122835.56
+Nonlin evals: obj = 870, grad = 869.
+
+Make['GARY',p,1] [*] :=
+bands  2301.84
+coils  9654.31
+plate  9120.77
+;
+
+Trans['GARY',j,'coils',4] [*] :=
+FRA  1753.46
+DET     0
+LAN     0
+WIN     0
+STL  1093.37
+FRE     0
+LAF     0
+;
+
+
+Parameters
+::::::::::
+
+set FACT := GARY CLEV PITT;
+
+set MARK := FRA DET LAN WIN STL FRE LAF;
+
+set PROD := bands coils plate;
+
+set TIME := 1 2 3 4;
+
+avail :=
+CLEV 1   154
+CLEV 2   126
+CLEV 3   149
+CLEV 4   134
+GARY 1   123
+GARY 2   137
+GARY 3   159
+GARY 4   132
+PITT 1   140
+PITT 2   139
+PITT 3   136
+PITT 4   128
+;
+
+inv0 :=
+CLEV bands    3693
+CLEV coils    1615
+CLEV plate    5978
+GARY bands    1593
+GARY coils    2607
+GARY plate   11690
+PITT bands    3034
+PITT coils    2535
+PITT plate    7870
+;
+
+rate :=
+CLEV bands   177
+CLEV coils   166
+CLEV plate   177
+GARY bands   193
+GARY coils   171
+GARY plate   167
+PITT bands   185
+PITT coils   192
+PITT plate   181
+;
+
+demand_current [*,bands,*]
+:      1      2      3      4      :=
+FRA   3795    986   3318   2698
+DET    367    336   2120   1118
+LAN   1195    810   2717   1267
+WIN   3377   2895   1222   1972
+STL    230   2853   2637   1553
+FRE   3001   2865    473   1222
+LAF    475   1301    814   1958
+
+ [*,coils,*]
+:      1      2      3      4      :=
+FRA   3113    807   2704   2205
+DET    301    275   1727    914
+LAN    980    663   2214   1036
+WIN   2770   2371    996   1612
+STL    189   2337   2149   1270
+FRE   2462   2346    385    999
+LAF    389   1065    663   1600
+
+ [*,plate,*]
+:       1      2      3      4      :=
+FRA   11132   2874   9653   7871
+DET    1078    980   6168   3264
+LAN    3507   2360   7905   3698
+WIN    9906   8437   3557   5755
+STL     678   8314   7672   4533
+FRE    8805   8347   1376   3567
+LAF    1395   3792   2368   5713
+;
+
+demand_response [*,*]
+:   bands coils plate    :=
+FRA   -87   -90   -79
+DET   -70   -77   -61
+LAN   -98   -57   -94
+WIN   -84   -55   -91
+STL   -85   -65   -58
+FRE   -66   -69   -51
+LAF   -65   -62   -82
+;
+
+price_current [*] :=
+bands  281.72
+coils  231.99
+plate  257.19
+;
+
+price_min = 0.75
+price_max = 1.25
+
+make_cost [CLEV,*,*] (tr)
+:   bands    coils    plate     :=
+1   198.74   173.9    149.05
+2   205.36   179.69   154.02
+3   211.99   185.49   158.99
+4   218.61   191.29   163.96
+
+ [GARY,*,*] (tr)
+:   bands    coils    plate     :=
+1   178.85   156.49   134.13
+2   184.81   161.71   138.61
+3   190.77   166.92   143.08
+4   196.73   172.14   147.55
+
+ [PITT,*,*] (tr)
+:   bands    coils    plate     :=
+1   167.08   146.19   125.31
+2   172.65   151.07   129.49
+3   178.22   155.94   133.66
+4   183.79   160.81   137.84
+;
+
+trans_cost [CLEV,*,*]
+:     bands   coils   plate    :=
+FRA   92.58   69.44   46.29
+DET   53.62   40.21   26.81
+LAN   84.61   63.46   42.31
+WIN   65.1    48.83   32.55
+STL   63.12   47.34   31.56
+FRE   74.59   55.94   37.29
+LAF   69.77   52.33   34.89
+
+ [GARY,*,*]
+:     bands   coils   plate    :=
+FRA   70.21   52.65   35.1
+DET   62.32   46.74   31.16
+LAN   90.62   67.97   45.31
+WIN   94.24   70.68   47.12
+STL   66.28   49.71   33.14
+FRE   87.15   65.36   43.57
+LAF   95.37   71.53   47.69
+
+ [PITT,*,*]
+:     bands   coils   plate    :=
+FRA   72.54   54.4    36.27
+DET   50.52   37.89   25.26
+LAN   68.31   51.23   34.15
+WIN   83.24   62.43   41.62
+STL   96.67   72.51   48.34
+FRE   74.41   55.81   37.21
+LAF   85      63.75   42.5
+;
+
+inv_cost :=
+CLEV bands   4
+CLEV coils   3.42
+CLEV plate   2.24
+GARY bands   4.3
+GARY coils   2.91
+GARY plate   2.43
+PITT bands   2.94
+PITT coils   2.49
+PITT plate   3.63
+;
+
+::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
+End dataset number  3
+::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
+
+::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
+Begin dataset number  4
+::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
+
+Optimal solution
+::::::::::::::::
+
+MINOS 5.51: optimal solution found.
+352 iterations, objective 37835886.72
+Nonlin evals: obj = 744, grad = 743.
+
+Make['GARY',p,1] [*] :=
+bands      0
+coils   1626.5
+plate  21148.7
+;
+
+Trans['GARY',j,'coils',4] [*] :=
+FRA  0
+DET  0
+LAN  0
+WIN  0
+STL  0
+FRE  0
+LAF  0
+;
+
+
+Parameters
+::::::::::
+
+set FACT := GARY CLEV PITT;
+
+set MARK := FRA DET LAN WIN STL FRE LAF;
+
+set PROD := bands coils plate;
+
+set TIME := 1 2 3 4;
+
+avail :=
+CLEV 1   144
+CLEV 2   155
+CLEV 3   159
+CLEV 4   142
+GARY 1   126
+GARY 2   140
+GARY 3   162
+GARY 4   156
+PITT 1   145
+PITT 2   122
+PITT 3   159
+PITT 4   156
+;
+
+inv0 :=
+CLEV bands   6206
+CLEV coils   1223
+CLEV plate   8604
+GARY bands   3844
+GARY coils   1406
+GARY plate   5151
+PITT bands   2568
+PITT coils    718
+PITT plate   7644
+;
+
+rate :=
+CLEV bands   177
+CLEV coils   173
+CLEV plate   169
+GARY bands   192
+GARY coils   166
+GARY plate   182
+PITT bands   195
+PITT coils   180
+PITT plate   164
+;
+
+demand_current [*,bands,*]
+:      1      2      3      4      :=
+FRA    372   2839   3922   4096
+DET   3205    841   4245   2881
+LAN   3187   2681    900    126
+WIN   3006   3275   3020   3564
+STL   3111   2556   5009   2455
+FRE   1900   1728   1118   3532
+LAF   3023   3919   2401   2875
+
+ [*,coils,*]
+:      1     2     3      4     :=
+FRA    87   670    924   964
+DET   758   198   1001   678
+LAN   753   633    211    29
+WIN   711   774    711   839
+STL   735   603   1181   578
+FRE   449   408    263   831
+LAF   714   926    566   676
+
+ [*,plate,*]
+:      1      2       3      4      :=
+FRA    763   5850    8042   8386
+DET   6559   1735    8705   5899
+LAN   6521   5524    1846    259
+WIN   6152   6749    6192   7297
+STL   6366   5267   10271   5027
+FRE   3889   3561    2294   7232
+LAF   6185   8075    4924   5887
+;
+
+demand_response [*,*]
+:   bands coils plate    :=
+FRA   -56   -82   -64
+DET   -51   -54   -80
+LAN   -95   -64   -60
+WIN   -94   -75   -84
+STL   -51   -72   -86
+FRE   -65   -68   -53
+LAF   -65   -71   -62
+;
+
+price_current [*] :=
+bands  284.51
+coils  292.45
+plate  297.69
+;
+
+price_min = 0.75
+price_max = 1.25
+
+make_cost [CLEV,*,*] (tr)
+:   bands    coils    plate     :=
+1   150.03   131.27   112.52
+2   155.03   135.65   116.27
+3   160.03   140.02   120.02
+4   165.03   144.4    123.77
+
+ [GARY,*,*] (tr)
+:   bands    coils    plate     :=
+1   196.46   171.9    147.35
+2   203.01   177.63   152.26
+3   209.56   183.36   157.17
+4   216.11   189.09   162.08
+
+ [PITT,*,*] (tr)
+:   bands    coils    plate     :=
+1   151.47   132.54   113.6
+2   156.52   136.96   117.39
+3   161.57   141.37   121.18
+4   166.62   145.79   124.96
+;
+
+trans_cost [CLEV,*,*]
+:     bands   coils   plate    :=
+FRA   62.54   46.91   31.27
+DET   63.33   47.5    31.67
+LAN   57.14   42.85   28.57
+WIN   57.66   43.24   28.83
+STL   56.94   42.71   28.47
+FRE   54.98   41.23   27.49
+LAF   66.89   50.17   33.44
+
+ [GARY,*,*]
+:     bands   coils   plate    :=
+FRA   90.45   67.83   45.22
+DET   64.7    48.53   32.35
+LAN   95.16   71.37   47.58
+WIN   50.9    38.18   25.45
+STL   56.78   42.58   28.39
+FRE   63.36   47.52   31.68
+LAF   71.56   53.67   35.78
+
+ [PITT,*,*]
+:     bands   coils   plate    :=
+FRA   96.98   72.73   48.49
+DET   66.82   50.12   33.41
+LAN   52.26   39.2    26.13
+WIN   95.64   71.73   47.82
+STL   83.13   62.35   41.57
+FRE   80.49   60.37   40.25
+LAF   64.15   48.11   32.08
+;
+
+inv_cost :=
+CLEV bands   2.06
+CLEV coils   2.22
+CLEV plate   3.34
+GARY bands   2.26
+GARY coils   4.37
+GARY plate   3.69
+PITT bands   4.31
+PITT coils   3.47
+PITT plate   4.68
+;
+
+::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
+End dataset number  4
+::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
+
+::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
+Begin dataset number  5
+::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
+
+Optimal solution
+::::::::::::::::
+
+MINOS 5.51: optimal solution found.
+327 iterations, objective 27437803.06
+Nonlin evals: obj = 678, grad = 677.
+
+Make['GARY',p,1] [*] :=
+bands   5259.54
+coils      0
+plate  17066.1
+;
+
+Trans['GARY',j,'coils',4] [*] :=
+FRA  0
+DET  0
+LAN  0
+WIN  0
+STL  0
+FRE  0
+LAF  0
+;
+
+
+Parameters
+::::::::::
+
+set FACT := GARY CLEV PITT;
+
+set MARK := FRA DET LAN WIN STL FRE LAF;
+
+set PROD := bands coils plate;
+
+set TIME := 1 2 3 4;
+
+avail :=
+CLEV 1   146
+CLEV 2   127
+CLEV 3   153
+CLEV 4   131
+GARY 1   135
+GARY 2   154
+GARY 3   122
+GARY 4   131
+PITT 1   150
+PITT 2   133
+PITT 3   142
+PITT 4   139
+;
+
+inv0 :=
+CLEV bands    4738
+CLEV coils    7355
+CLEV plate    3107
+GARY bands    2803
+GARY coils   10650
+GARY plate    5065
+PITT bands    4020
+PITT coils   10917
+PITT plate    4392
+;
+
+rate :=
+CLEV bands   197
+CLEV coils   180
+CLEV plate   151
+GARY bands   170
+GARY coils   157
+GARY plate   164
+PITT bands   183
+PITT coils   199
+PITT plate   196
+;
+
+demand_current [*,bands,*]
+:      1      2      3      4      :=
+FRA    874    322   2411   2179
+DET   1626   3184   1161   1520
+LAN   2871   1579   1802   1349
+WIN   2374   2296   2188   2280
+STL   1943   3078   2425    807
+FRE   2924   1384   2235   2512
+LAF    779    936    781   1788
+
+ [*,coils,*]
+:      1      2      3      4      :=
+FRA   1946    716   5358   4852
+DET   3621   7061   2581   3385
+LAN   6391   3503   4006   3003
+WIN   5286   5092   4863   5076
+STL   4327   6827   5390   1797
+FRE   6510   3069   4967   5594
+LAF   1735   2076   1738   3982
+
+ [*,plate,*]
+:      1      2      3      4      :=
+FRA   1176    436   3222   2940
+DET   2189   4302   1552   2052
+LAN   3864   2134   2409   1820
+WIN   3196   3102   2924   3076
+STL   2615   4160   3240   1089
+FRE   3936   1870   2986   3390
+LAF   1049   1265   1044   2413
+;
+
+demand_response [*,*]
+:   bands coils plate    :=
+FRA   -85   -52   -91
+DET   -79   -95   -76
+LAN   -93   -52   -52
+WIN   -85   -57   -97
+STL   -62   -74   -61
+FRE   -84   -79   -55
+LAF   -97   -58   -66
+;
+
+price_current [*] :=
+bands  293.7
+coils  235.81
+plate  296.34
+;
+
+price_min = 0.75
+price_max = 1.25
+
+make_cost [CLEV,*,*] (tr)
+:   bands    coils    plate     :=
+1   179.2    156.8    134.4
+2   185.17   162.03   138.88
+3   191.15   167.25   143.36
+4   197.12   172.48   147.84
+
+ [GARY,*,*] (tr)
+:   bands    coils    plate     :=
+1   196.11   171.6    147.08
+2   202.65   177.32   151.99
+3   209.19   183.04   156.89
+4   215.72   188.76   161.79
+
+ [PITT,*,*] (tr)
+:   bands    coils    plate     :=
+1   161.62   141.41   121.21
+2   167      146.13   125.25
+3   172.39   150.84   129.29
+4   177.78   155.55   133.33
+;
+
+trans_cost [CLEV,*,*]
+:     bands   coils   plate    :=
+FRA   62.17   46.63   31.09
+DET   73.43   55.07   36.72
+LAN   95.55   71.66   47.78
+WIN   83.4    62.55   41.7
+STL   93.47   70.1    46.73
+FRE   56.39   42.29   28.2
+LAF   87.28   65.46   43.64
+
+ [GARY,*,*]
+:     bands   coils   plate    :=
+FRA   75      56.25   37.5
+DET   71.67   53.75   35.84
+LAN   70.11   52.58   35.05
+WIN   98.88   74.16   49.44
+STL   57.33   43      28.67
+FRE   54.5    40.88   27.25
+LAF   80      60      40
+
+ [PITT,*,*]
+:     bands   coils   plate    :=
+FRA   64.04   48.03   32.02
+DET   84.38   63.29   42.19
+LAN   65.87   49.4    32.94
+WIN   76.03   57.03   38.02
+STL   84.54   63.4    42.27
+FRE   61.66   46.25   30.83
+LAF   98.69   74.02   49.35
+;
+
+inv_cost :=
+CLEV bands   2.37
+CLEV coils   3.08
+CLEV plate   3.32
+GARY bands   4.18
+GARY coils   4.9
+GARY plate   2.58
+PITT bands   2.31
+PITT coils   3.06
+PITT plate   2.9
+;
+
+::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
+End dataset number  5
+::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
+
+::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
+Begin dataset number  6
+::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
+
+Optimal solution
+::::::::::::::::
+
+MINOS 5.51: optimal solution found.
+303 iterations, objective 11549667.61
+Nonlin evals: obj = 617, grad = 616.
+
+Make['GARY',p,1] [*] :=
+bands   8318.74
+coils      0
+plate  23595.3
+;
+
+Trans['GARY',j,'coils',4] [*] :=
+FRA  3812
+DET     0
+LAN     0
+WIN     0
+STL     0
+FRE  3051.29
+LAF     0
+;
+
+
+Parameters
+::::::::::
+
+set FACT := GARY CLEV PITT;
+
+set MARK := FRA DET LAN WIN STL FRE LAF;
+
+set PROD := bands coils plate;
+
+set TIME := 1 2 3 4;
+
+avail :=
+CLEV 1   160
+CLEV 2   149
+CLEV 3   167
+CLEV 4   155
+GARY 1   168
+GARY 2   120
+GARY 3   141
+GARY 4   167
+PITT 1   167
+PITT 2   126
+PITT 3   124
+PITT 4   131
+;
+
+inv0 :=
+CLEV bands    3327
+CLEV coils    7098
+CLEV plate    1697
+GARY bands    3435
+GARY coils   10513
+GARY plate    1246
+PITT bands    2127
+PITT coils   11517
+PITT plate    1038
+;
+
+rate :=
+CLEV bands   188
+CLEV coils   160
+CLEV plate   195
+GARY bands   177
+GARY coils   181
+GARY plate   195
+PITT bands   177
+PITT coils   154
+PITT plate   185
+;
+
+demand_current [*,bands,*]
+:      1      2      3      4      :=
+FRA    462   1207   1571   1448
+DET   1068   2681   1575   1662
+LAN   2657    397   1821   2318
+WIN   1845   1717   1909    103
+STL   2089     91   1756   2156
+FRE   2415   3490   1518   2052
+LAF   2226    632   1030   1954
+
+ [*,coils,*]
+:       1       2      3      4      :=
+FRA    1778    4609   6018   5590
+DET    4106   10232   6031   6418
+LAN   10213    1517   6975   8946
+WIN    7093    6554   7312    401
+STL    8029     350   6725   8322
+FRE    9282   13317   5814   7921
+LAF    8556    2415   3945   7542
+
+ [*,plate,*]
+:      1      2      3     4     :=
+FRA    194    507   661   611
+DET    450   1127   663   701
+LAN   1120    166   766   978
+WIN    777    722   803    43
+STL    880     38   739   910
+FRE   1018   1468   639   866
+LAF    938    265   433   824
+;
+
+demand_response [*,*]
+:   bands coils plate    :=
+FRA   -77   -77   -99
+DET   -82   -81   -78
+LAN   -97   -92   -67
+WIN   -94   -73   -78
+STL   -65   -59   -79
+FRE   -97   -72   -71
+LAF   -96   -71   -63
+;
+
+price_current [*] :=
+bands  272.84
+coils  212.05
+plate  230.41
+;
+
+price_min = 0.75
+price_max = 1.25
+
+make_cost [CLEV,*,*] (tr)
+:   bands    coils    plate     :=
+1   197.16   172.51   147.87
+2   203.73   178.26   152.8
+3   210.3    184.01   157.73
+4   216.87   189.77   162.66
+
+ [GARY,*,*] (tr)
+:   bands    coils    plate     :=
+1   193.96   169.72   145.47
+2   200.43   175.38   150.32
+3   206.9    181.03   155.17
+4   213.36   186.69   160.02
+
+ [PITT,*,*] (tr)
+:   bands    coils    plate     :=
+1   195.48   171.04   146.61
+2   201.99   176.74   151.49
+3   208.51   182.44   156.38
+4   215.02   188.15   161.27
+;
+
+trans_cost [CLEV,*,*]
+:     bands   coils   plate    :=
+FRA   87.35   65.52   43.68
+DET   62.02   46.51   31.01
+LAN   58.38   43.78   29.19
+WIN   65.41   49.06   32.71
+STL   51.92   38.94   25.96
+FRE   99.24   74.43   49.62
+LAF   53.13   39.84   26.56
+
+ [GARY,*,*]
+:     bands   coils   plate    :=
+FRA   54.59   40.94   27.3
+DET   93.89   70.42   46.95
+LAN   83.7    62.77   41.85
+WIN   71.94   53.95   35.97
+STL   68.42   51.32   34.21
+FRE   56.63   42.47   28.32
+LAF   85.27   63.95   42.64
+
+ [PITT,*,*]
+:     bands   coils   plate    :=
+FRA   78.72   59.04   39.36
+DET   96      72      48
+LAN   92.49   69.37   46.25
+WIN   97.42   73.07   48.71
+STL   53.25   39.94   26.62
+FRE   86.14   64.61   43.07
+LAF   81.38   61.04   40.69
+;
+
+inv_cost :=
+CLEV bands   4.51
+CLEV coils   4.41
+CLEV plate   3.5
+GARY bands   3.62
+GARY coils   3.56
+GARY plate   2.37
+PITT bands   4.2
+PITT coils   3.43
+PITT plate   3.58
+;
+
+::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
+End dataset number  6
+::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
+
+::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
+Begin dataset number  7
+::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
+
+Optimal solution
+::::::::::::::::
+
+MINOS 5.51: optimal solution found.
+302 iterations, objective 27985882.29
+Nonlin evals: obj = 623, grad = 622.
+
+Make['GARY',p,1] [*] :=
+bands    961
+coils  21126.5
+plate  10456
+;
+
+Trans['GARY',j,'coils',4] [*] :=
+FRA  4773.7
+DET  2751.48
+LAN     0
+WIN  5330.38
+STL     0
+FRE     0
+LAF     0
+;
+
+
+Parameters
+::::::::::
+
+set FACT := GARY CLEV PITT;
+
+set MARK := FRA DET LAN WIN STL FRE LAF;
+
+set PROD := bands coils plate;
+
+set TIME := 1 2 3 4;
+
+avail :=
+CLEV 1   137
+CLEV 2   120
+CLEV 3   167
+CLEV 4   121
+GARY 1   165
+GARY 2   162
+GARY 3   156
+GARY 4   125
+PITT 1   141
+PITT 2   130
+PITT 3   148
+PITT 4   164
+;
+
+inv0 :=
+CLEV bands    1076
+CLEV coils    5079
+CLEV plate   10313
+GARY bands    1636
+GARY coils    4215
+GARY plate   12010
+PITT bands    1290
+PITT coils    6004
+PITT plate    8294
+;
+
+rate :=
+CLEV bands   154
+CLEV coils   171
+CLEV plate   165
+GARY bands   194
+GARY coils   198
+GARY plate   196
+PITT bands   177
+PITT coils   160
+PITT plate   196
+;
+
+demand_current [*,bands,*]
+:      1      2      3      4      :=
+FRA   1412    694    240    981
+DET   1842    901    427    709
+LAN    944    803    805    225
+WIN    107   1090     97   1336
+STL   1637    870   2329   1148
+FRE    898   1368   1771   1098
+LAF    356    996   1908   1132
+
+ [*,coils,*]
+:      1      2      3      4      :=
+FRA   3739   1835    639   2570
+DET   4876   2382   1135   1857
+LAN   2499   2123   2139    589
+WIN    286   2883    259   3498
+STL   4332   2300   6187   3006
+FRE   2377   3618   4707   2876
+LAF    943   2635   5069   2965
+
+ [*,plate,*]
+:      1      2       3      4      :=
+FRA   7541   3700    1287   5277
+DET   9835   4803    2286   3813
+LAN   5041   4281    4309   1211
+WIN    577   5814     522   7182
+STL   8738   4638   12459   6173
+FRE   4794   7295    9479   5905
+LAF   1902   5314   10207   6088
+;
+
+demand_response [*,*]
+:   bands coils plate    :=
+FRA   -70   -90   -88
+DET   -78   -86   -85
+LAN   -58   -97   -92
+WIN   -62   -90   -78
+STL   -59   -84   -83
+FRE   -78   -78   -72
+LAF   -53   -54   -59
+;
+
+price_current [*] :=
+bands  230.87
+coils  278.04
+plate  265.94
+;
+
+price_min = 0.75
+price_max = 1.25
+
+make_cost [CLEV,*,*] (tr)
+:   bands    coils    plate     :=
+1   199.04   174.16   149.28
+2   205.68   179.97   154.26
+3   212.31   185.77   159.23
+4   218.95   191.58   164.21
+
+ [GARY,*,*] (tr)
+:   bands    coils    plate     :=
+1   167.9    146.91   125.92
+2   173.5    151.81   130.12
+3   179.09   156.71   134.32
+4   184.69   161.6    138.52
+
+ [PITT,*,*] (tr)
+:   bands    coils    plate     :=
+1   187.11   163.72   140.33
+2   193.35   169.18   145.01
+3   199.58   174.63   149.69
+4   205.82   180.09   154.36
+;
+
+trans_cost [CLEV,*,*]
+:     bands   coils   plate    :=
+FRA   90.36   67.77   45.18
+DET   83.57   62.68   41.78
+LAN   51.78   38.83   25.89
+WIN   56.08   42.06   28.04
+STL   96.68   72.51   48.34
+FRE   73.47   55.1    36.73
+LAF   57.83   43.37   28.92
+
+ [GARY,*,*]
+:     bands   coils   plate    :=
+FRA   52.47   39.35   26.24
+DET   82.82   62.12   41.41
+LAN   84.2    63.15   42.1
+WIN   70.35   52.76   35.18
+STL   82.29   61.72   41.14
+FRE   77.24   57.93   38.62
+LAF   84.53   63.4    42.26
+
+ [PITT,*,*]
+:     bands   coils   plate    :=
+FRA   88.03   66.03   44.02
+DET   76.65   57.49   38.33
+LAN   94.16   70.62   47.08
+WIN   66.94   50.21   33.47
+STL   55.03   41.27   27.51
+FRE   62.08   46.56   31.04
+LAF   54.16   40.62   27.08
+;
+
+inv_cost :=
+CLEV bands   3.97
+CLEV coils   2.82
+CLEV plate   2.59
+GARY bands   4.54
+GARY coils   2.97
+GARY plate   4.5
+PITT bands   3.06
+PITT coils   2.86
+PITT plate   4.61
+;
+
+::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
+End dataset number  7
+::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
+
+::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
+Begin dataset number  8
+::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
+
+Optimal solution
+::::::::::::::::
+
+MINOS 5.51: optimal solution found.
+382 iterations, objective 20080293.48
+Nonlin evals: obj = 732, grad = 731.
+
+Make['GARY',p,1] [*] :=
+bands  22935.1
+coils   3196.84
+plate   1546.96
+;
+
+Trans['GARY',j,'coils',4] [*] :=
+FRA  4728.24
+DET     0
+LAN     0
+WIN   877.734
+STL  4241.58
+FRE  4765.34
+LAF     0
+;
+
+
+Parameters
+::::::::::
+
+set FACT := GARY CLEV PITT;
+
+set MARK := FRA DET LAN WIN STL FRE LAF;
+
+set PROD := bands coils plate;
+
+set TIME := 1 2 3 4;
+
+avail :=
+CLEV 1   156
+CLEV 2   138
+CLEV 3   129
+CLEV 4   144
+GARY 1   143
+GARY 2   150
+GARY 3   160
+GARY 4   146
+PITT 1   149
+PITT 2   140
+PITT 3   142
+PITT 4   130
+;
+
+inv0 :=
+CLEV bands   4473
+CLEV coils   3247
+CLEV plate   1167
+GARY bands   4123
+GARY coils   6090
+GARY plate    746
+PITT bands   8864
+PITT coils   4072
+PITT plate   1197
+;
+
+rate :=
+CLEV bands   173
+CLEV coils   155
+CLEV plate   177
+GARY bands   197
+GARY coils   173
+GARY plate   191
+PITT bands   170
+PITT coils   179
+PITT plate   150
+;
+
+demand_current [*,bands,*]
+:      1      2       3      4      :=
+FRA   1299   1992    4457   4000
+DET   7122   1057    3856   2315
+LAN   3980   7486    3178   6041
+WIN   5439   9362   10105   1241
+STL   1844    971     310   2951
+FRE   5675   6050    7247   6044
+LAF   6858   3991    2057   7736
+
+ [*,coils,*]
+:      1      2      3      4      :=
+FRA    984   1506   3371   3017
+DET   5396    799   2916   1746
+LAN   3015   5663   2404   4557
+WIN   4121   7081   7642    936
+STL   1397    735    234   2226
+FRE   4300   4576   5481   4559
+LAF   5196   3019   1555   5836
+
+ [*,plate,*]
+:      1      2      3      4      :=
+FRA    238    365    816    736
+DET   1308    193    706    425
+LAN    731   1374    582   1111
+WIN    999   1718   1852    228
+STL    338    178     56    543
+FRE   1042   1110   1328   1112
+LAF   1260    732    376   1423
+;
+
+demand_response [*,*]
+:   bands coils plate    :=
+FRA   -84   -81   -99
+DET   -81   -81   -97
+LAN   -71   -61   -77
+WIN   -94   -67   -78
+STL   -51   -61   -70
+FRE   -98   -66   -86
+LAF   -59   -59   -91
+;
+
+price_current [*] :=
+bands  259.15
+coils  290.72
+plate  216.64
+;
+
+price_min = 0.75
+price_max = 1.25
+
+make_cost [CLEV,*,*] (tr)
+:   bands    coils    plate     :=
+1   166.15   145.38   124.61
+2   171.69   150.23   128.77
+3   177.23   155.07   132.92
+4   182.77   159.92   137.07
+
+ [GARY,*,*] (tr)
+:   bands    coils    plate     :=
+1   170.79   149.44   128.09
+2   176.48   154.42   132.36
+3   182.17   159.4    136.63
+4   187.86   164.38   140.9
+
+ [PITT,*,*] (tr)
+:   bands    coils    plate     :=
+1   177.92   155.68   133.44
+2   183.85   160.87   137.89
+3   189.78   166.06   142.34
+4   195.71   171.25   146.78
+;
+
+trans_cost [CLEV,*,*]
+:     bands   coils   plate    :=
+FRA   93.25   69.94   46.63
+DET   55.34   41.51   27.67
+LAN   54.19   40.64   27.09
+WIN   93.73   70.3    46.87
+STL   58.54   43.91   29.27
+FRE   73.37   55.03   36.68
+LAF   68.22   51.17   34.11
+
+ [GARY,*,*]
+:     bands   coils   plate    :=
+FRA   71.93   53.95   35.96
+DET   75.66   56.74   37.83
+LAN   78.38   58.78   39.19
+WIN   69.16   51.87   34.58
+STL   51.6    38.7    25.8
+FRE   60.93   45.7    30.46
+LAF   78.4    58.8    39.2
+
+ [PITT,*,*]
+:     bands   coils   plate    :=
+FRA   80.44   60.33   40.22
+DET   56.49   42.37   28.24
+LAN   83.61   62.71   41.8
+WIN   75.9    56.92   37.95
+STL   62.59   46.94   31.29
+FRE   77.47   58.11   38.74
+LAF   98.05   73.54   49.03
+;
+
+inv_cost :=
+CLEV bands   3.22
+CLEV coils   2.31
+CLEV plate   2.88
+GARY bands   4.06
+GARY coils   4.59
+GARY plate   4.55
+PITT bands   2.6
+PITT coils   4.82
+PITT plate   4.16
+;
+
+::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
+End dataset number  8
+::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
+
+::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
+Begin dataset number  9
+::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
+
+Optimal solution
+::::::::::::::::
+
+MINOS 5.51: optimal solution found.
+327 iterations, objective 19838673.09
+Nonlin evals: obj = 651, grad = 650.
+
+Make['GARY',p,1] [*] :=
+bands   9282
+coils  14889.8
+plate   3953.79
+;
+
+Trans['GARY',j,'coils',4] [*] :=
+FRA     0
+DET     0
+LAN     0
+WIN  2578.26
+STL     0
+FRE     0
+LAF     0
+;
+
+
+Parameters
+::::::::::
+
+set FACT := GARY CLEV PITT;
+
+set MARK := FRA DET LAN WIN STL FRE LAF;
+
+set PROD := bands coils plate;
+
+set TIME := 1 2 3 4;
+
+avail :=
+CLEV 1   164
+CLEV 2   137
+CLEV 3   127
+CLEV 4   165
+GARY 1   154
+GARY 2   142
+GARY 3   128
+GARY 4   126
+PITT 1   154
+PITT 2   138
+PITT 3   149
+PITT 4   144
+;
+
+inv0 :=
+CLEV bands   7235
+CLEV coils   4781
+CLEV plate   5993
+GARY bands   4450
+GARY coils   5126
+GARY plate   5291
+PITT bands   3730
+PITT coils   3699
+PITT plate   3731
+;
+
+rate :=
+CLEV bands   167
+CLEV coils   170
+CLEV plate   197
+GARY bands   174
+GARY coils   187
+GARY plate   188
+PITT bands   189
+PITT coils   158
+PITT plate   189
+;
+
+demand_current [*,bands,*]
+:      1      2      3      4      :=
+FRA   5882   1420    439   1385
+DET   4446   4993   3984   5224
+LAN   4053   3029   1511   3749
+WIN   2165   4966   2027   5300
+STL   5019   2295   1440   4388
+FRE   4156   2553   6476    177
+LAF    177   3651   6397   3624
+
+ [*,coils,*]
+:      1      2      3      4      :=
+FRA   4336   1046    320   1017
+DET   3277   3680   2911   3839
+LAN   2987   2232   1104   2755
+WIN   1596   3660   1481   3895
+STL   3700   1692   1052   3224
+FRE   3063   1881   4732    130
+LAF    130   2691   4674   2663
+
+ [*,plate,*]
+:      1      2      3      4      :=
+FRA   5196   1251    385   1226
+DET   3928   4402   3498   4626
+LAN   3580   2670   1327   3320
+WIN   1913   4378   1780   4694
+STL   4434   2023   1264   3885
+FRE   3671   2250   5686    156
+LAF    156   3219   5616   3209
+;
+
+demand_response [*,*]
+:   bands coils plate    :=
+FRA   -64   -87   -64
+DET   -89   -77   -74
+LAN   -59   -60   -69
+WIN   -68   -89   -90
+STL   -91   -66   -84
+FRE   -62   -52   -61
+LAF   -89   -71   -73
+;
+
+price_current [*] :=
+bands  235.07
+coils  280.75
+plate  254.25
+;
+
+price_min = 0.75
+price_max = 1.25
+
+make_cost [CLEV,*,*] (tr)
+:   bands    coils    plate     :=
+1   162.92   142.56   122.19
+2   168.35   147.31   126.26
+3   173.78   152.06   130.34
+4   179.21   156.81   134.41
+
+ [GARY,*,*] (tr)
+:   bands    coils    plate     :=
+1   194.11   169.85   145.58
+2   200.58   175.51   150.43
+3   207.05   181.17   155.29
+4   213.52   186.83   160.14
+
+ [PITT,*,*] (tr)
+:   bands    coils    plate     :=
+1   194.3    170.01   145.72
+2   200.77   175.68   150.58
+3   207.25   181.34   155.44
+4   213.73   187.01   160.3
+;
+
+trans_cost [CLEV,*,*]
+:     bands   coils   plate    :=
+FRA   83.7    62.78   41.85
+DET   82.7    62.03   41.35
+LAN   56.75   42.56   28.38
+WIN   89.73   67.3    44.87
+STL   64.38   48.29   32.19
+FRE   65.9    49.42   32.95
+LAF   65.01   48.76   32.5
+
+ [GARY,*,*]
+:     bands   coils   plate    :=
+FRA   97.42   73.06   48.71
+DET   84.17   63.13   42.08
+LAN   99.85   74.89   49.92
+WIN   80.92   60.69   40.46
+STL   57.17   42.88   28.59
+FRE   82.66   61.99   41.33
+LAF   81.87   61.4    40.93
+
+ [PITT,*,*]
+:     bands   coils   plate    :=
+FRA   67.26   50.45   33.63
+DET   63.96   47.97   31.98
+LAN   60.96   45.72   30.48
+WIN   88.51   66.39   44.26
+STL   70.64   52.98   35.32
+FRE   55.88   41.91   27.94
+LAF   73.17   54.88   36.58
+;
+
+inv_cost :=
+CLEV bands   2.56
+CLEV coils   2.07
+CLEV plate   4.59
+GARY bands   2.47
+GARY coils   3.54
+GARY plate   3.5
+PITT bands   3.15
+PITT coils   4.14
+PITT plate   4.23
+;
+
+::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
+End dataset number  9
+::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
+
+::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
+Begin dataset number 10
+::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
+
+Optimal solution
+::::::::::::::::
+
+MINOS 5.51: optimal solution found.
+198 iterations, objective 21989539.94
+Nonlin evals: obj = 387, grad = 386.
+
+Make['GARY',p,1] [*] :=
+bands   8380.62
+coils    187.681
+plate  16351.2
+;
+
+Trans['GARY',j,'coils',4] [*] :=
+FRA     0
+DET     0
+LAN     0
+WIN  1160.68
+STL     0
+FRE     0
+LAF     0
+;
+
+
+Parameters
+::::::::::
+
+set FACT := GARY CLEV PITT;
+
+set MARK := FRA DET LAN WIN STL FRE LAF;
+
+set PROD := bands coils plate;
+
+set TIME := 1 2 3 4;
+
+avail :=
+CLEV 1   150
+CLEV 2   132
+CLEV 3   150
+CLEV 4   165
+GARY 1   130
+GARY 2   139
+GARY 3   159
+GARY 4   137
+PITT 1   160
+PITT 2   138
+PITT 3   124
+PITT 4   122
+;
+
+inv0 :=
+CLEV bands    1535
+CLEV coils    4784
+CLEV plate   10597
+GARY bands    1684
+GARY coils    2661
+GARY plate    8324
+PITT bands    1957
+PITT coils    6809
+PITT plate    7960
+;
+
+rate :=
+CLEV bands   157
+CLEV coils   174
+CLEV plate   167
+GARY bands   188
+GARY coils   165
+GARY plate   194
+PITT bands   198
+PITT coils   160
+PITT plate   160
+;
+
+demand_current [*,bands,*]
+:      1      2      3      4      :=
+FRA   1489   1388    945    483
+DET    317    537    683    959
+LAN    368   1650     62    387
+WIN    626    979   1481    982
+STL   1184   1479    196   1262
+FRE   2044    236   1538   1354
+LAF    925    206   1902   1190
+
+ [*,coils,*]
+:      1      2      3      4      :=
+FRA   4030   3752   2579   1332
+DET    861   1453   1863   2643
+LAN    997   4457    172   1067
+WIN   1696   2645   4040   2706
+STL   3206   3996    537   3476
+FRE   5533    638   4197   3731
+LAF   2506    558   5189   3278
+
+ [*,plate,*]
+:       1      2      3      4      :=
+FRA    7390   6935   4785   2449
+DET    1579   2687   3457   4858
+LAN    1829   8239    320   1962
+WIN    3110   4890   7493   4974
+STL    5878   7386    998   6390
+FRE   10145   1180   7785   6858
+LAF    4594   1032   9625   6024
+;
+
+demand_response [*,*]
+:   bands coils plate    :=
+FRA   -57   -78   -76
+DET   -53   -63   -59
+LAN   -91   -58   -63
+WIN   -59   -89   -55
+STL   -91   -53   -72
+FRE   -63   -50   -52
+LAF   -97   -56   -59
+;
+
+price_current [*] :=
+bands  267.49
+coils  205.12
+plate  263.52
+;
+
+price_min = 0.75
+price_max = 1.25
+
+make_cost [CLEV,*,*] (tr)
+:   bands    coils    plate     :=
+1   165.9    145.16   124.42
+2   171.43   150      128.57
+3   176.96   154.84   132.72
+4   182.49   159.68   136.87
+
+ [GARY,*,*] (tr)
+:   bands    coils    plate     :=
+1   183.49   160.55   137.62
+2   189.61   165.91   142.21
+3   195.72   171.26   146.79
+4   201.84   176.61   151.38
+
+ [PITT,*,*] (tr)
+:   bands    coils    plate     :=
+1   162.19   141.92   121.64
+2   167.6    146.65   125.7
+3   173      151.38   129.75
+4   178.41   156.11   133.81
+;
+
+trans_cost [CLEV,*,*]
+:     bands   coils   plate    :=
+FRA   87.78   65.84   43.89
+DET   94.68   71.01   47.34
+LAN   71.43   53.57   35.71
+WIN   75.41   56.56   37.71
+STL   63.52   47.64   31.76
+FRE   50.69   38.02   25.34
+LAF   96.88   72.66   48.44
+
+ [GARY,*,*]
+:     bands   coils   plate    :=
+FRA   50.86   38.14   25.43
+DET   77.72   58.29   38.86
+LAN   79.67   59.75   39.84
+WIN   53.78   40.33   26.89
+STL   81.13   60.85   40.56
+FRE   99.09   74.32   49.54
+LAF   94.04   70.53   47.02
+
+ [PITT,*,*]
+:     bands   coils   plate    :=
+FRA   92.85   69.64   46.42
+DET   60.52   45.39   30.26
+LAN   98.35   73.76   49.17
+WIN   94.1    70.58   47.05
+STL   95.15   71.36   47.58
+FRE   99.8    74.85   49.9
+LAF   82.32   61.74   41.16
+;
+
+inv_cost :=
+CLEV bands   4.98
+CLEV coils   4.93
+CLEV plate   3.7
+GARY bands   3.93
+GARY coils   4.91
+GARY plate   4.18
+PITT bands   2.57
+PITT coils   2.13
+PITT plate   3.69
+;
+
+::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
+End dataset number 10
+::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
+
+::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
+Begin dataset number 11
+::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
+
+Optimal solution
+::::::::::::::::
+
+MINOS 5.51: optimal solution found.
+308 iterations, objective 21206858.2
+Nonlin evals: obj = 615, grad = 614.
+
+Make['GARY',p,1] [*] :=
+bands   9998
+coils  11957.9
+plate   5200.18
+;
+
+Trans['GARY',j,'coils',4] [*] :=
+FRA     0
+DET     0
+LAN     0
+WIN  1327.34
+STL  1769.51
+FRE  1873.32
+LAF  1507.76
+;
+
+
+Parameters
+::::::::::
+
+set FACT := GARY CLEV PITT;
+
+set MARK := FRA DET LAN WIN STL FRE LAF;
+
+set PROD := bands coils plate;
+
+set TIME := 1 2 3 4;
+
+avail :=
+CLEV 1   160
+CLEV 2   166
+CLEV 3   150
+CLEV 4   135
+GARY 1   167
+GARY 2   140
+GARY 3   155
+GARY 4   136
+PITT 1   148
+PITT 2   145
+PITT 3   139
+PITT 4   164
+;
+
+inv0 :=
+CLEV bands    1931
+CLEV coils     428
+CLEV plate   13177
+GARY bands    4177
+GARY coils     523
+GARY plate    6373
+PITT bands    4539
+PITT coils     484
+PITT plate   13474
+;
+
+rate :=
+CLEV bands   160
+CLEV coils   196
+CLEV plate   155
+GARY bands   160
+GARY coils   168
+GARY plate   156
+PITT bands   176
+PITT coils   153
+PITT plate   191
+;
+
+demand_current [*,bands,*]
+:      1      2      3      4      :=
+FRA    824   2778   1373   1567
+DET   2169   2098    297    409
+LAN   2357    713   2266    269
+WIN   1097   1026   2271   2742
+STL   2908    602   2159   3206
+FRE   1664   2404    838   2397
+LAF   1129   1925   2150    604
+
+ [*,coils,*]
+:      1     2     3     4     :=
+FRA   215   729   359   403
+DET   567   550    77   105
+LAN   617   187   593    69
+WIN   287   269   594   706
+STL   761   157   565   826
+FRE   435   631   219   617
+LAF   295   505   562   155
+
+ [*,plate,*]
+:       1       2      3       4      :=
+FRA    3253   10973   5422    6231
+DET    8562    8287   1177    1627
+LAN    9303    2818   8946    1074
+WIN    4331    4054   8967   10905
+STL   11476    2379   8524   12748
+FRE    6568    9497   3309    9531
+LAF    4456    7604   8488    2405
+;
+
+demand_response [*,*]
+:   bands coils plate    :=
+FRA   -62   -54   -75
+DET   -58   -55   -98
+LAN   -78   -82   -52
+WIN   -94   -63   -55
+STL   -67   -77   -85
+FRE   -74   -74   -67
+LAF   -60   -89   -69
+;
+
+price_current [*] :=
+bands  212.52
+coils  249.67
+plate  245.33
+;
+
+price_min = 0.75
+price_max = 1.25
+
+make_cost [CLEV,*,*] (tr)
+:   bands    coils    plate     :=
+1   196.11   171.6    147.09
+2   202.65   177.32   151.99
+3   209.19   183.04   156.89
+4   215.73   188.76   161.79
+
+ [GARY,*,*] (tr)
+:   bands    coils    plate     :=
+1   162.85   142.49   122.13
+2   168.27   147.24   126.21
+3   173.7    151.99   130.28
+4   179.13   156.74   134.35
+
+ [PITT,*,*] (tr)
+:   bands    coils    plate     :=
+1   184.09   161.08   138.07
+2   190.22   166.45   142.67
+3   196.36   171.81   147.27
+4   202.5    177.18   151.87
+;
+
+trans_cost [CLEV,*,*]
+:     bands   coils   plate    :=
+FRA   59.92   44.94   29.96
+DET   71.15   53.36   35.58
+LAN   57      42.75   28.5
+WIN   70.22   52.66   35.11
+STL   58.27   43.7    29.14
+FRE   61.43   46.07   30.72
+LAF   69.97   52.47   34.98
+
+ [GARY,*,*]
+:     bands   coils   plate    :=
+FRA   93.36   70.02   46.68
+DET   98.72   74.04   49.36
+LAN   92.05   69.04   46.03
+WIN   71.01   53.26   35.51
+STL   55.66   41.74   27.83
+FRE   53.29   39.97   26.64
+LAF   60.92   45.69   30.46
+
+ [PITT,*,*]
+:     bands   coils   plate    :=
+FRA   99.19   74.39   49.59
+DET   88.58   66.43   44.29
+LAN   91.43   68.57   45.72
+WIN   91.11   68.33   45.56
+STL   59.75   44.82   29.88
+FRE   98.5    73.88   49.25
+LAF   89.37   67.03   44.69
+;
+
+inv_cost :=
+CLEV bands   3.17
+CLEV coils   4.2
+CLEV plate   2.18
+GARY bands   3.98
+GARY coils   3.43
+GARY plate   4.79
+PITT bands   4.41
+PITT coils   3.36
+PITT plate   4.42
+;
+
+::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
+End dataset number 11
+::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::

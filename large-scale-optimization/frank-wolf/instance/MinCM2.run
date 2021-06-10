@@ -1,0 +1,231 @@
+reset;
+option log_file 'RSD.txt';
+model MinCM2.mod;
+data net_5.dat;
+option solver minos;
+
+param minbeta; #marcador para determinar elementos de Ws que se eliminan
+param u{links};
+param vv{links};
+param f_obj;
+param Colfill default 1; #En que columna de Ws debemos poner la nueva solucion de subproblema
+
+param pSTOP;
+param l;
+param relgap;
+param BLB default -100000;
+param epsi := 0.0005;
+
+
+problem AoN: v_k, v, N, flux_total, Vg; #SUBPROBLEM
+problem Master: active, v, beta, Vnl, convhull1, convhull2; #Master problem
+problem Q: v_k, v, N, flux_total, Vnl; #full problem
+
+#table of results creation
+#printf "Iteration f_obj rel_gap beta1 beta2 beta3 Wx Ws rho\n"  > CP_Iter_res.txt;
+
+
+printf "\nEQUILIBRIUM PROBLEM SOLVED USING AMPL\n";
+printf "-----------------------------------------------------------------------|\n\n";
+solve Q;
+
+display v;
+display v_k;
+
+
+printf "\nRESTRICTED SIMPLICIAL DECOMPOSITION ALGORITHM\n";
+printf "-----------------------------------------------------------------------|\n\n";
+
+printf "INITIAL FEASIBLE SOLUTION\n";
+printf "--------------------------------------------------------|\n\n";
+let {(i,j) in links} t0[i,j]:=1;
+solve AoN; 
+let {(i,j) in links} vv[i,j]:=v[i,j]; #solucio inicial
+let {(i,j) in links} Wx[i,j]:=v[i,j]; #inicial
+let Y[0] := 1; #siempre sera 1
+
+let pSTOP:=0; 
+let l:=1;
+
+repeat while l <=500 {
+
+printf "\nITERATION %d\n", l;
+printf "--------------------------------------------------------|\n";
+
+	let {(i,j) in links} t0[i,j] := c[i,j]+cap[i,j]*vv[i,j]; # gradiente de v
+	
+	printf "\nSOLVING SUBPROBLEM\n\n";
+
+	solve AoN;
+	
+	if Col < rho then {  		
+		let {(i,j) in links} Ws[i,j,Colfill] := v[i,j];
+		let Col := Col + 1; #actualizamos el numero de elementos dentro de Ws
+		let {(i,j) in links} Wx[i,j] := Wx[i,j];
+		let Y[Colfill] := 1; #activamos el parametro que indica que la columna de W estara activa
+
+		
+	} else if Col = rho then {
+		
+		let minbeta :=  min {p in 1..rho: Y[p]>0} beta[p]; 	
+		display minbeta;
+		
+		for  {p in 1..rho} {
+				 if beta[p] = minbeta then {
+					let {(i,j) in links} Ws[i,j,p] := v[i,j];
+					#display p;			
+					};					
+				}			
+		let {(i,j) in links} Wx[i,j] := vv[i,j];
+
+		};
+		
+	#definimos W set {Wx union Ws}
+	let {(i,j) in links} W[i,j,0] := Wx[i,j];
+	let {(i,j) in links, p in {1..rho}} W[i,j,p] := Ws[i,j,p];
+	
+	printf "\nNumber of elements Wx and Ws:\n";
+	printf "%1i %1i\n", 1, Col;
+			
+	let BLB:= max(BLB,((sum {(i, j) in links }c[i,j]*vv[i,j] + 
+	sum {(i, j) in links }0.5*cap[i,j]*vv[i,j]^2)+sum{(i,j) in links}t0[i,j]*(v[i,j]-vv[i,j])));
+	let relgap:= ((sum {(i, j) in links }c[i,j]*vv[i,j] + sum {(i, j) in links }0.5*cap[i,j]*vv[i,j]^2)-BLB)/BLB;
+	
+	printf "\nRelative Gap\n";
+	display abs(relgap); #los primeros relative gaps son negativos
+	
+	if abs(relgap) <= epsi then break;
+	
+	printf "\nSOLVING MASTER PROBLEM\n\n";
+	
+	#display Y;
+	
+	solve Master;
+	let {(i,j) in links} vv[i,j]:=v[i,j]; #actializamos para la siguiente solucion del problema
+	let f_obj:= sum{(i,j) in links} (c[i, j]*vv[i, j] + 0.5*cap[i,j]*vv[i,j]^2);
+	#linear search only for rho=1, otherwise we are considering a hull 
+		
+	#Se eliminan las columnas de Ws con beta=0 en este procedimiento. 
+	#Colfil toma un valor posible en el que añadir la nueva solucion dentro de W
+	#una vez eliminados los valores con beta 0
+	for  {p in 1..Col} {
+			if beta[p] = 0 then {
+				let {(i,j) in links} Ws[i,j,p] := 0;						
+				let Col := Col - 1;
+				let Y[p] := 0;
+				let Colfill := p;
+				} else if sum {i in 1..Col: beta[i]=0} 1 = 0 then {
+				let Colfill := Col + 1; #si collfill > rho no hay problema porque Col=rho
+				};
+			}
+
+			
+	printf "\nObjective Function\n";
+	display f_obj;
+	
+	printf "\nBeta convex hull (alfa linear search if rho=1)\n";
+	display beta;
+	
+	#Print results of iteration l
+		printf "%3i %12.2f %12.5f",
+				l, 
+				f_obj,
+				relgap > CP_Iter_res.txt; 		
+		
+		printf {p in 0..rho}: "%12.2f", beta[p] > CP_Iter_res.txt;
+		
+		printf {p in 0..rho}: "%12.2f", Y[p] > CP_Iter_res.txt;
+		
+		printf "%3i %3i %3i\n",
+				1,
+				Col,
+				1+Col,
+				rho > CP_Iter_res.txt;
+	############################################################	
+	
+	let l:=l+1;
+
+}
+
+printf "\nROUTES ORIGIN DESTINATION PAIRS\n";
+printf "-----------------------------------------------------------------------|\n\n";
+
+param coste{links};
+let {(i,j) in links} coste[i,j] := c[i,j]+cap[i,j]*v[i,j];
+
+printf "\nRUTE 1-5\n";
+printf "--------------------------------------------------------|\n";
+
+printf "\nthrough 1-2-3-5:\n";
+display coste[1,2]+coste[2,3]+coste[3,5];
+
+
+printf "through 1-2-5:\n";
+display coste[1,2]+coste[2,5];
+
+printf "\nRUTE 1-7\n";
+printf "--------------------------------------------------------|\n";
+
+printf "\nthrough 1-7:\n";
+display coste[1,7];
+printf "through 1-6-7:\n";
+display coste[1,6]+coste[6,7];
+
+printf "\nRUTE 3-5\n";
+printf "--------------------------------------------------------|\n";
+
+printf "\nthrough 3-5:\n"; #only one path
+display coste[3,5];
+printf "\nthrough 3-4-5:\n"; #only one path
+display coste[3,4]+coste[4,5];
+
+printf "\nRUTE 3-7 \n";
+printf "--------------------------------------------------------|\n";
+
+printf "\nthrough 3-7:\n";
+display coste[3,7];
+printf "through 3-6-7:\n";
+display coste[3,6] + coste[6,7];
+
+
+
+printf "\nROUTES ORIGIN DESTINATION PAIRS OPTIMAS \n";
+printf "-----------------------------------------------------------------------|\n\n";
+
+solve Q;
+
+let {(i,j) in links} coste[i,j] := c[i,j]+cap[i,j]*v[i,j];
+
+printf "\nRUTE 1-5\n";
+printf "--------------------------------------------------------|\n";
+
+printf "\nthrough 1-2-3-5:\n";
+display coste[1,2]+coste[2,3]+coste[3,5];
+
+
+printf "through 1-2-5:\n";
+display coste[1,2]+coste[2,5];
+
+printf "\nRUTE 1-7\n";
+printf "--------------------------------------------------------|\n";
+
+printf "\nthrough 1-7:\n";
+display coste[1,7];
+printf "through 1-6-7:\n";
+display coste[1,6]+coste[6,7];
+
+printf "\nRUTE 3-5\n";
+printf "--------------------------------------------------------|\n";
+
+printf "\nthrough 3-5:\n"; #only one path
+display coste[3,5];
+printf "\nthrough 3-4-5:\n"; #only one path
+display coste[3,4]+coste[4,5];
+
+printf "\nRUTE 3-7 \n";
+printf "--------------------------------------------------------|\n";
+
+printf "\nthrough 3-7:\n";
+display coste[3,7];
+printf "through 3-6-7:\n";
+display coste[3,6] + coste[6,7];
