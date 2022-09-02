@@ -1,4 +1,4 @@
-## Repo with some of my master's in Operations Research assignments
+## Repo with some Operations Research assignments
 
 ### clustering
 
